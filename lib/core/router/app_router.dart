@@ -2,20 +2,57 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/auth_controller.dart';
+import '../../features/couple/presentation/link_partner_screen.dart';
+import '../../features/cards/presentation/timeline_screen.dart';
+import '../../features/cards/presentation/post_card_screen.dart';
+import '../../features/report/presentation/report_screen.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
 
-GoRouter createRouter() {
+final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/',
+    redirect: (context, state) {
+      final authState = ref.read(authControllerProvider);
+      final isLoggedIn = authState.when(
+        data: (user) => user != null,
+        loading: () => null,
+        error: (_, _) => false,
+      );
+      final isAuthRoute = state.matchedLocation == '/login';
+
+      if (isLoggedIn == null) return null;
+      if (!isLoggedIn && !isAuthRoute) return '/login';
+      if (isLoggedIn && isAuthRoute) return '/';
+      return null;
+    },
     routes: [
       GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
         path: '/',
-        builder: (context, state) => const SizedBox.shrink(),
+        builder: (context, state) => const TimelineScreen(),
+      ),
+      GoRoute(
+        path: '/link-partner',
+        builder: (context, state) => const LinkPartnerScreen(),
+      ),
+      GoRoute(
+        path: '/post',
+        builder: (context, state) => const PostCardScreen(),
+      ),
+      GoRoute(
+        path: '/report',
+        builder: (context, state) => const ReportScreen(),
       ),
     ],
   );
-}
+});
 
