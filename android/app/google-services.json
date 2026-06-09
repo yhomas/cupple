@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "213375994118",
+    "project_id": "cupple-app-a9194",
+    "storage_bucket": "cupple-app-a9194.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:213375994118:android:d14bd9b61e4b9a26d6f687",
+        "android_client_info": {
+          "package_name": "com.yhomas.cupple"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCL5bmd0V-HTQ9cKDCmwI5Yi-eLVdxwhwg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
