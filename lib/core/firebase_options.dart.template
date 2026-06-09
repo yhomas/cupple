@@ -1,0 +1,65 @@
+
+
+
+// firebase_options.dart テンプレート
+// 
+// このファイルは `flutterfire configure` で自動生成されます。
+// 手動で作成する場合は以下の手順で行ってください：
+//
+// 1. Firebase Console でプロジェクトを作成
+// 2. iOS/Android/Web アプリを登録
+// 3. `dart pub global activate flutterfire_cli` を実行
+// 4. `flutterfire configure` を実行
+// 5. 生成された firebase_options.dart を lib/ に配置
+//
+// 以下のコードは flutterfire configure で生成される形式のテンプレートです。
+
+import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
+
+class DefaultFirebaseOptions {
+  static FirebaseOptions get currentPlatform {
+    if (kIsWeb) {
+      return web;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return android;
+      case TargetPlatform.iOS:
+        return ios;
+      default:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions are not supported for this platform.',
+        );
+    }
+  }
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'YOUR_API_KEY',
+    appId: 'YOUR_APP_ID',
+    messagingSenderId: 'YOUR_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    authDomain: 'YOUR_PROJECT.firebaseapp.com',
+    storageBucket: 'YOUR_PROJECT.appspot.com',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'YOUR_API_KEY',
+    appId: 'YOUR_APP_ID',
+    messagingSenderId: 'YOUR_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    storageBucket: 'YOUR_PROJECT.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'YOUR_API_KEY',
+    appId: 'YOUR_APP_ID',
+    messagingSenderId: 'YOUR_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    storageBucket: 'YOUR_PROJECT.appspot.com',
+    iosBundleId: 'com.example.cupple',
+  );
+}
+
+

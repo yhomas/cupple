@@ -24,10 +24,12 @@
 
 
 
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/max_width_container.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme_controller.dart';
 import '../../cards/domain/card_model.dart';
 import '../../cards/presentation/card_controller.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -54,7 +56,16 @@ class ReportScreen extends ConsumerWidget {
     final cardsAsync = ref.watch(timelineCardsProvider(user.coupleId!));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('レポート')),
+      appBar: AppBar(
+        title: const Text('レポート'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.brightness_6),
+            tooltip: 'テーマ切替',
+            onPressed: () => ref.read(themeModeControllerProvider.notifier).toggle(),
+          ),
+        ],
+      ),
       body: MaxWidthContainer(
         child: cardsAsync.when(
           data: (cards) {
@@ -66,6 +77,8 @@ class ReportScreen extends ConsumerWidget {
             for (final cat in CardCategory.values) {
               categoryStats[cat] = cards.where((c) => c.category == cat).length;
             }
+
+            final weeklyData = _calcWeeklyData(cards);
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -103,6 +116,10 @@ class ReportScreen extends ConsumerWidget {
                     color: AppColors.mintGreen,
                   ),
                   const SizedBox(height: 24),
+                  Text('過去7日間', style: theme.textTheme.titleLarge),
+                  const SizedBox(height: 16),
+                  _WeeklyChart(data: weeklyData),
+                  const SizedBox(height: 24),
                   Text('カテゴリー別', style: theme.textTheme.titleLarge),
                   const SizedBox(height: 16),
                   ...CardCategory.values.map((cat) {
@@ -124,6 +141,144 @@ class ReportScreen extends ConsumerWidget {
           error: (e, _) => Center(child: Text('エラー: $e')),
         ),
       ),
+    );
+  }
+
+  List<_DayData> _calcWeeklyData(List<CardModel> cards) {
+    final now = DateTime.now();
+    final List<_DayData> result = [];
+    for (int i = 6; i >= 0; i--) {
+      final date = now.subtract(Duration(days: i));
+      final dayStart = DateTime(date.year, date.month, date.day);
+      final dayEnd = dayStart.add(const Duration(days: 1));
+      final dayCards = cards.where((c) =>
+          c.createdAt.isAfter(dayStart) && c.createdAt.isBefore(dayEnd)).toList();
+      result.add(_DayData(
+        date: date,
+        thankYou: dayCards.where((c) => c.type == CardType.thankYou).length,
+        didIt: dayCards.where((c) => c.type == CardType.didIt).length,
+      ));
+    }
+    return result;
+  }
+}
+
+class _DayData {
+  final DateTime date;
+  final int thankYou;
+  final int didIt;
+  _DayData({required this.date, required this.thankYou, required this.didIt});
+}
+
+class _WeeklyChart extends StatelessWidget {
+  final List<_DayData> data;
+  const _WeeklyChart({required this.data});
+
+  static const _weekdayLabels = ['月', '火', '水', '木', '金', '土', '日'];
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final maxVal = data.map((d) => d.thankYou + d.didIt).fold(0, (a, b) => a > b ? a : b);
+    final scale = maxVal == 0 ? 1.0 : maxVal.toDouble();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: data.map((d) {
+                final total = d.thankYou + d.didIt;
+                final thankRatio = d.thankYou / scale;
+                final didRatio = d.didIt / scale;
+                final weekday = _weekdayLabels[d.date.weekday - 1];
+                return Column(
+                  children: [
+                    Text('$total', style: theme.textTheme.labelSmall),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      width: 32,
+                      height: 80,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (d.thankYou > 0)
+                            Container(
+                              width: 24,
+                              height: (thankRatio * 60).clamp(4, 60),
+                              decoration: BoxDecoration(
+                                color: AppColors.pastelPink,
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(4),
+                                ),
+                              ),
+                            ),
+                          if (d.didIt > 0)
+                            Container(
+                              width: 24,
+                              height: (didRatio * 60).clamp(4, 60),
+                              decoration: BoxDecoration(
+                                color: AppColors.warmOrange,
+                                borderRadius: BorderRadius.vertical(
+                                  bottom: const Radius.circular(4),
+                                  top: d.thankYou > 0 ? Radius.zero : const Radius.circular(4),
+                                ),
+                              ),
+                            ),
+                          if (total == 0)
+                            Container(
+                              width: 24,
+                              height: 4,
+                              color: AppColors.mediumGray,
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(weekday, style: theme.textTheme.labelSmall),
+                  ],
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _LegendDot(color: AppColors.pastelPink, label: 'ありがとう'),
+                const SizedBox(width: 16),
+                _LegendDot(color: AppColors.warmOrange, label: 'やったよ'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LegendDot extends StatelessWidget {
+  final Color color;
+  final String label;
+  const _LegendDot({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(3),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(label, style: Theme.of(context).textTheme.labelSmall),
+      ],
     );
   }
 }

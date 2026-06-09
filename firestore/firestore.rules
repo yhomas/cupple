@@ -1,0 +1,65 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── ヘルパー関数 ──────────────────────────────────
+
+    // ユーザーが認証済みか
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // ユーザードキュメントの所有者か
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // カップルメンバーか
+    function isCoupleMember(coupleId) {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/couples/$(coupleId)) &&
+        request.auth.uid in get(/databases/$(database)/documents/couples/$(coupleId)).data.userIds;
+    }
+
+    // リクエストの送信者がカップルのメンバーか
+    function isSenderInCouple(coupleId) {
+      return isAuthenticated() &&
+        request.auth.uid in resource.data.userIds;
+    }
+
+    // ── users コレクション ───────────────────────────
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if false; // ユーザー削除は不可
+    }
+
+    // ── couples コレクション ─────────────────────────
+    match /couples/{coupleId} {
+      allow read: if isCoupleMember(coupleId);
+      allow create: if isAuthenticated();
+      allow update: if isCoupleMember(coupleId);
+      allow delete: if false; // カップル削除は不可
+    }
+
+    // ── cards コレクション ───────────────────────────
+    match /cards/{cardId} {
+      allow read: if isAuthenticated() &&
+        isCoupleMember(resource.data.coupleId);
+
+      allow create: if isAuthenticated() &&
+        request.auth.uid == request.resource.data.senderId &&
+        isCoupleMember(request.resource.data.coupleId);
+
+      allow update: if isAuthenticated() &&
+        isCoupleMember(resource.data.coupleId) &&
+        // 承認フィールドのみ更新可能
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['isAcknowledged', 'acknowledgementEmoji']);
+
+      allow delete: if false; // カード削除は不可
+    }
+  }
+}

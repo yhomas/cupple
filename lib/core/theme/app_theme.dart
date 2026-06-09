@@ -114,6 +114,116 @@ class AppTheme {
       ),
     );
   }
+
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.pastelPink,
+        brightness: Brightness.dark,
+        primary: AppColors.pastelPink,
+        secondary: AppColors.warmOrange,
+        tertiary: AppColors.mintGreen,
+        surface: const Color(0xFF2D2D3A),
+        surfaceContainerHighest: const Color(0xFF3A3A4A),
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: const Color(0xFFE8E8E8),
+      ),
+      scaffoldBackgroundColor: const Color(0xFF1E1E2E),
+      textTheme: GoogleFonts.notoSansJpTextTheme().copyWith(
+        headlineLarge: GoogleFonts.notoSansJp(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFFE8E8E8),
+        ),
+        headlineMedium: GoogleFonts.notoSansJp(
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFFE8E8E8),
+        ),
+        bodyLarge: GoogleFonts.notoSansJp(
+          fontSize: 16,
+          color: const Color(0xFFE8E8E8),
+        ),
+        bodyMedium: GoogleFonts.notoSansJp(
+          fontSize: 14,
+          color: const Color(0xFFE8E8E8),
+        ),
+        labelLarge: GoogleFonts.notoSansJp(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: const Color(0xFF2D2D3A),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: GoogleFonts.notoSansJp(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: const Color(0xFF2D2D3A),
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.pastelPink,
+          foregroundColor: Colors.white,
+          elevation: 2,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: GoogleFonts.notoSansJp(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.warmOrange,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: const Color(0xFF2D2D3A),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.mediumGray),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.mediumGray),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.pastelPink, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: const Color(0xFF2D2D3A),
+        indicatorColor: AppColors.pastelPinkLight,
+        labelTextStyle: WidgetStateProperty.all(
+          GoogleFonts.notoSansJp(fontSize: 12),
+        ),
+      ),
+    );
+  }
 }
 
 

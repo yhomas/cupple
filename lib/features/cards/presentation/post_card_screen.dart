@@ -41,12 +41,21 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
   late TabController _tabController;
   final _contentController = TextEditingController();
   CardCategory _selectedCategory = CardCategory.housework;
+  String? _selectedStamp;
   bool _isLoading = false;
+
+  static const _thankYouStamps = ['💐', '🍰', '☕', '🎁', '🌸'];
+  static const _didItStamps = ['💪', '🏆', '✅', '🔥', '⭐'];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() => _selectedStamp = null);
+      }
+    });
   }
 
   @override
@@ -70,6 +79,7 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
             type: type,
             category: _selectedCategory,
             content: _contentController.text.trim(),
+            stamp: _selectedStamp,
           );
       if (mounted) context.go('/');
     } catch (e) {
@@ -86,6 +96,7 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final stamps = _tabController.index == 0 ? _thankYouStamps : _didItStamps;
     return Scaffold(
       appBar: AppBar(
         title: const Text('カードを投稿'),
@@ -126,6 +137,32 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
                       selected: isSelected,
                       onSelected: (_) => setState(() => _selectedCategory = cat),
                       selectedColor: AppColors.mintGreen.withValues(alpha: 0.5),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+                Text('スタンプ', style: theme.textTheme.titleSmall),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: stamps.map((stamp) {
+                    final isSelected = _selectedStamp == stamp;
+                    return InkWell(
+                      onTap: () => setState(() => _selectedStamp = isSelected ? null : stamp),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.pastelPinkLight
+                              : AppColors.lightGray,
+                          borderRadius: BorderRadius.circular(12),
+                          border: isSelected
+                              ? Border.all(color: AppColors.pastelPink, width: 2)
+                              : null,
+                        ),
+                        child: Text(stamp, style: const TextStyle(fontSize: 28)),
+                      ),
                     );
                   }).toList(),
                 ),

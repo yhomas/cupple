@@ -1,0 +1,19 @@
+
+
+// Firebase Web設定
+// このファイルを firebase-config.js にリネームし、
+// Firebase Console → プロジェクト設定 → ウェブアプリ から
+// 設定値をコピーして貼り付けてください。
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID",
+};
+
+// Firebase初期化
+firebase.initializeApp(firebaseConfig);
+

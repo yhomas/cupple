@@ -111,102 +111,139 @@ class _CardTile extends ConsumerWidget {
     final isMine = card.senderId == myUid;
     final isThankYou = card.type == CardType.thankYou;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Dismissible(
+      key: Key(card.cardId),
+      direction: (!isMine && !card.isAcknowledged)
+          ? DismissDirection.startToEnd
+          : DismissDirection.none,
+      confirmDismiss: (_) async {
+        ref.read(cardControllerProvider.notifier).acknowledgeCard(
+              card.cardId,
+              '❤️',
+            );
+        return false;
+      },
+      background: Container(
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 20),
+        decoration: BoxDecoration(
+          color: AppColors.pastelPinkLight,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Row(
           children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: isThankYou
-                      ? AppColors.pastelPinkLight
-                      : AppColors.warmOrangeLight,
-                  child: Icon(
-                    isThankYou ? Icons.favorite : Icons.star,
-                    size: 16,
-                    color: isThankYou
-                        ? AppColors.pastelPinkDark
-                        : AppColors.warmOrangeDark,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: isThankYou
+            Icon(Icons.favorite, color: AppColors.pastelPinkDark),
+            SizedBox(width: 8),
+            Text('褒める！', style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: isThankYou
                         ? AppColors.pastelPinkLight
                         : AppColors.warmOrangeLight,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    CardModel.typeLabel(card.type),
-                    style: theme.textTheme.labelSmall?.copyWith(
+                    child: Icon(
+                      isThankYou ? Icons.favorite : Icons.star,
+                      size: 16,
                       color: isThankYou
                           ? AppColors.pastelPinkDark
                           : AppColors.warmOrangeDark,
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.mintGreen.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    CardModel.categoryLabel(card.category),
-                    style: theme.textTheme.labelSmall,
-                  ),
-                ),
-                const Spacer(),
-                if (card.isAcknowledged)
-                  Text(
-                    card.acknowledgementEmoji ?? '❤️',
-                    style: const TextStyle(fontSize: 20),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(card.content, style: theme.textTheme.bodyLarge),
-            const SizedBox(height: 8),
-            Text(
-              _formatTime(card.createdAt),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.mediumGray,
-              ),
-            ),
-            if (!isMine && !card.isAcknowledged) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: _reactionEmojis.map((emoji) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: InkWell(
-                      onTap: () {
-                        ref.read(cardControllerProvider.notifier).acknowledgeCard(
-                              card.cardId,
-                              emoji,
-                            );
-                      },
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.lightGray,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(emoji, style: const TextStyle(fontSize: 20)),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isThankYou
+                          ? AppColors.pastelPinkLight
+                          : AppColors.warmOrangeLight,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      CardModel.typeLabel(card.type),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: isThankYou
+                            ? AppColors.pastelPinkDark
+                            : AppColors.warmOrangeDark,
                       ),
                     ),
-                  );
-                }).toList(),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.mintGreen.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      CardModel.categoryLabel(card.category),
+                      style: theme.textTheme.labelSmall,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (card.isAcknowledged)
+                    Text(
+                      card.acknowledgementEmoji ?? '❤️',
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                ],
               ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (card.stamp != null) ...[
+                    Text(card.stamp!, style: const TextStyle(fontSize: 24)),
+                    const SizedBox(width: 8),
+                  ],
+                  Expanded(child: Text(card.content, style: theme.textTheme.bodyLarge)),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _formatTime(card.createdAt),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.mediumGray,
+                ),
+              ),
+              if (!isMine && !card.isAcknowledged) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: _reactionEmojis.map((emoji) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: InkWell(
+                        onTap: () {
+                          ref.read(cardControllerProvider.notifier).acknowledgeCard(
+                                card.cardId,
+                                emoji,
+                              );
+                        },
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.lightGray,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(emoji, style: const TextStyle(fontSize: 20)),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
