@@ -1,9 +1,6 @@
 
-
-
-
-
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../core/debug/debug_log.dart';
 import '../data/auth_repository.dart';
 import '../domain/user_model.dart';
 
@@ -26,18 +23,24 @@ class AuthController extends _$AuthController {
   }
 
   Future<void> signIn(String email, String password) async {
+    dlog("AuthController.signIn: START");
     final repo = ref.read(authRepositoryProvider);
     await repo.signInWithEmail(email, password);
+    dlog("AuthController.signIn: DONE");
   }
 
   Future<void> signUp(String email, String password, String displayName) async {
+    dlog("AuthController.signUp: START");
     final repo = ref.read(authRepositoryProvider);
     await repo.signUpWithEmail(email, password, displayName);
+    dlog("AuthController.signUp: DONE");
   }
 
   Future<void> signOut() async {
+    dlog("AuthController.signOut: START");
     final repo = ref.read(authRepositoryProvider);
     await repo.signOut();
+    dlog("AuthController.signOut: DONE");
   }
 }
 
@@ -50,9 +53,4 @@ UserModel? currentUser(CurrentUserRef ref) {
     error: (_, _) => null,
   );
 }
-
-
-
-
-
 

@@ -2,6 +2,7 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/debug/debug_log.dart';
 import '../domain/user_model.dart';
 
 class AuthRepository {
@@ -13,45 +14,61 @@ class AuthRepository {
   Stream<fb.User?> get authStateChanges => _auth.authStateChanges();
 
   Future<UserModel> signInWithEmail(String email, String password) async {
-    final cred = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    final user = cred.user!;
-    // Ensure user document exists in Firestore
-    await _db.collection('users').doc(user.uid).set({
-      'uid': user.uid,
-      'displayName': user.displayName ?? '',
-      'photoUrl': user.photoURL,
-      'createdAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
-    return UserModel(
-      uid: user.uid,
-      displayName: user.displayName ?? '',
-      photoUrl: user.photoURL,
-      createdAt: DateTime.now(),
-    );
+    dlog("signInWithEmail: START, email=$email");
+    try {
+      final cred = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      final user = cred.user!;
+      dlog("signInWithEmail: auth SUCCESS, uid=${user.uid}");
+      await _db.collection('users').doc(user.uid).set({
+        'uid': user.uid,
+        'displayName': user.displayName ?? '',
+        'photoUrl': user.photoURL,
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      dlog("signInWithEmail: user doc set OK");
+      return UserModel(
+        uid: user.uid,
+        displayName: user.displayName ?? '',
+        photoUrl: user.photoURL,
+        createdAt: DateTime.now(),
+      );
+    } catch (e, st) {
+      dlog("signInWithEmail: ERROR: $e");
+      dlog("signInWithEmail: STACK: $st");
+      rethrow;
+    }
   }
 
   Future<UserModel> signUpWithEmail(String email, String password, String displayName) async {
-    final cred = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    final user = cred.user!;
-    await user.updateDisplayName(displayName);
-    // Create user document in Firestore
-    await _db.collection('users').doc(user.uid).set({
-      'uid': user.uid,
-      'displayName': displayName,
-      'photoUrl': user.photoURL,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-    return UserModel(
-      uid: user.uid,
-      displayName: displayName,
-      createdAt: DateTime.now(),
-    );
+    dlog("signUpWithEmail: START, email=$email");
+    try {
+      final cred = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      final user = cred.user!;
+      dlog("signUpWithEmail: auth SUCCESS, uid=${user.uid}");
+      await user.updateDisplayName(displayName);
+      await _db.collection('users').doc(user.uid).set({
+        'uid': user.uid,
+        'displayName': displayName,
+        'photoUrl': user.photoURL,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      dlog("signUpWithEmail: user doc set OK");
+      return UserModel(
+        uid: user.uid,
+        displayName: displayName,
+        createdAt: DateTime.now(),
+      );
+    } catch (e, st) {
+      dlog("signUpWithEmail: ERROR: $e");
+      dlog("signUpWithEmail: STACK: $st");
+      rethrow;
+    }
   }
 
   Future<void> signOut() async {

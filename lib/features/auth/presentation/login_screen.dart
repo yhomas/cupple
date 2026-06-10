@@ -13,6 +13,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/max_width_container.dart';
+import '../../../../core/debug/debug_log.dart';
 import 'auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -39,24 +40,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _submit() async {
+    dlog("_submit: START, isSignUp=$_isSignUp");
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
     try {
       if (_isSignUp) {
+        dlog("_submit: calling signUp");
         await ref.read(authControllerProvider.notifier).signUp(
               _emailController.text.trim(),
               _passwordController.text.trim(),
               _nameController.text.trim(),
             );
+        dlog("_submit: signUp SUCCESS");
       } else {
+        dlog("_submit: calling signIn");
         await ref.read(authControllerProvider.notifier).signIn(
               _emailController.text.trim(),
               _passwordController.text.trim(),
             );
+        dlog("_submit: signIn SUCCESS");
       }
-    } catch (e) {
+    } catch (e, st) {
+      dlog("_submit: ERROR: $e");
+      dlog("_submit: STACK: $st");
       if (mounted) {
         setState(() {
           _errorMessage = e.toString();
@@ -64,6 +72,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } finally {
       if (mounted) {
+        dlog("_submit: FINALLY, setting isLoading=false");
         setState(() => _isLoading = false);
       }
     }
