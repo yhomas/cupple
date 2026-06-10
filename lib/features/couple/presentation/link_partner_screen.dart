@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/debug/debug_log.dart';
 import '../../../../core/widgets/max_width_container.dart';
 import 'couple_controller.dart';
+import '../../auth/presentation/auth_controller.dart';
 
 class LinkPartnerScreen extends ConsumerStatefulWidget {
   const LinkPartnerScreen({super.key});
@@ -88,7 +89,18 @@ class _LinkPartnerScreenState extends ConsumerState<LinkPartnerScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('パートナー連携')),
+      appBar: AppBar(
+        title: const Text('パートナー連携'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'ログアウト',
+            onPressed: () async {
+              await ref.read(authControllerProvider.notifier).signOut();
+            },
+          ),
+        ],
+      ),
       body: MaxWidthContainer(
         child: SafeArea(
           child: Padding(
