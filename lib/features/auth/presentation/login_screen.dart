@@ -1,17 +1,9 @@
 
 
 
-
-
-
-
-
-
-
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/widgets/max_width_container.dart';
 import '../../../../core/debug/debug_log.dart';
 import 'auth_controller.dart';
@@ -61,6 +53,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               _passwordController.text.trim(),
             );
         dlog("_submit: signIn SUCCESS");
+      }
+      // Navigate to home after successful auth
+      if (mounted) {
+        dlog("_submit: navigating to /");
+        context.go('/');
       }
     } catch (e, st) {
       dlog("_submit: ERROR: $e");
@@ -183,17 +180,4 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
