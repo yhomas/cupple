@@ -6,6 +6,7 @@ import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  String? firebaseError;
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -14,12 +15,14 @@ void main() async {
     if (e.code == 'duplicate-app') {
       // Already initialized by firebase-config.js
     } else {
-      rethrow;
+      firebaseError = 'Firebase init error: ${e.code} - ${e.message}';
     }
+  } catch (e) {
+    firebaseError = 'Firebase init error: $e';
   }
   runApp(
-    const ProviderScope(
-      child: CuppleApp(),
+    ProviderScope(
+      child: CuppleApp(firebaseError: firebaseError),
     ),
   );
 }

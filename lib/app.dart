@@ -5,7 +5,9 @@ import 'core/theme/theme_controller.dart';
 import 'core/router/app_router.dart';
 
 class CuppleApp extends ConsumerWidget {
-  const CuppleApp({super.key});
+  final String? firebaseError;
+
+  const CuppleApp({super.key, this.firebaseError});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,6 +21,30 @@ class CuppleApp extends ConsumerWidget {
       themeMode: themeMode,
       debugShowCheckedModeBanner: false,
       routerConfig: router,
+      builder: (context, child) {
+        if (firebaseError != null) {
+          return Column(
+            children: [
+              Material(
+                color: Colors.red.shade700,
+                child: SafeArea(
+                  bottom: false,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      firebaseError!,
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(child: child ?? const SizedBox.shrink()),
+            ],
+          );
+        }
+        return child ?? const SizedBox.shrink();
+      },
     );
   }
 }
