@@ -35,7 +35,7 @@ class TimelineScreen extends ConsumerWidget {
 
     if (user == null || user.coupleId == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('タイムライン')),
+        appBar: AppBar(title: const Text('タイムライン'), actions: [IconButton(icon: const Icon(Icons.logout), tooltip: 'ログアウト', onPressed: () async { await ref.read(authControllerProvider.notifier).signOut(); if (context.mounted) context.go('/login'); })]),
         body: MaxWidthContainer(
           child: Center(
             child: Column(
@@ -59,7 +59,7 @@ class TimelineScreen extends ConsumerWidget {
     final cardsAsync = ref.watch(timelineCardsProvider(user.coupleId!));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('タイムライン')),
+      appBar: AppBar(title: const Text('タイムライン'), actions: [IconButton(icon: const Icon(Icons.logout), tooltip: 'ログアウト', onPressed: () async { await ref.read(authControllerProvider.notifier).signOut(); if (context.mounted) context.go('/login'); })]),
       body: MaxWidthContainer(
         child: cardsAsync.when(
           data: (cards) {

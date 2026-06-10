@@ -101,6 +101,8 @@ class _LinkPartnerScreenState extends ConsumerState<LinkPartnerScreen> {
             tooltip: 'ログアウト',
             onPressed: () async {
               await ref.read(authControllerProvider.notifier).signOut();
+              if (!context.mounted) return;
+              context.go('/login');
             },
           ),
         ],
