@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'core/router/app_router.dart';
+import 'core/debug/debug_overlay.dart';
 
 class CuppleApp extends ConsumerWidget {
   final String? firebaseError;
@@ -22,8 +23,9 @@ class CuppleApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       routerConfig: router,
       builder: (context, child) {
+        Widget content = child ?? const SizedBox.shrink();
         if (firebaseError != null) {
-          return Column(
+          content = Column(
             children: [
               Material(
                 color: Colors.red.shade700,
@@ -39,11 +41,11 @@ class CuppleApp extends ConsumerWidget {
                   ),
                 ),
               ),
-              Expanded(child: child ?? const SizedBox.shrink()),
+              Expanded(child: content),
             ],
           );
         }
-        return child ?? const SizedBox.shrink();
+        return DebugOverlay(child: content);
       },
     );
   }

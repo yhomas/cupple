@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../../core/debug/debug_log.dart';
 import '../../../../core/widgets/max_width_container.dart';
 import 'couple_controller.dart';
 
@@ -27,7 +28,9 @@ class _LinkPartnerScreenState extends ConsumerState<LinkPartnerScreen> {
 
   Future<void> _createCouple() async {
     final fbUser = FirebaseAuth.instance.currentUser;
+    dlog("_createCouple: fbUser = ${fbUser?.uid ?? "null"}");
     if (fbUser == null) {
+      dlog("_createCouple: user is NULL, returning");
       setState(() => _errorMessage = 'ユーザーがログインしていません');
       return;
     }
@@ -38,10 +41,12 @@ class _LinkPartnerScreenState extends ConsumerState<LinkPartnerScreen> {
     try {
       final couple = await ref.read(coupleControllerProvider.notifier).createCouple(fbUser.uid);
       if (mounted) {
+        dlog("_createCouple: SUCCESS, code=${couple.inviteCode}");
         setState(() => _generatedCode = couple.inviteCode);
       }
     } catch (e) {
       if (mounted) {
+        dlog('_createCouple: ERROR: $e');
         setState(() => _errorMessage = '$e');
       }
     } finally {
@@ -51,7 +56,9 @@ class _LinkPartnerScreenState extends ConsumerState<LinkPartnerScreen> {
 
   Future<void> _joinCouple() async {
     final fbUser = FirebaseAuth.instance.currentUser;
+    dlog("_createCouple: fbUser = ${fbUser?.uid ?? "null"}");
     if (fbUser == null) {
+      dlog("_createCouple: user is NULL, returning");
       setState(() => _errorMessage = 'ユーザーがログインしていません');
       return;
     }
@@ -69,6 +76,7 @@ class _LinkPartnerScreenState extends ConsumerState<LinkPartnerScreen> {
       }
     } catch (e) {
       if (mounted) {
+        dlog('_createCouple: ERROR: $e');
         setState(() => _errorMessage = '$e');
       }
     } finally {
