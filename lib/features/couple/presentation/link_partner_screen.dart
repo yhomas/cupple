@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/widgets/max_width_container.dart';
 import 'couple_controller.dart';
-import '../../auth/presentation/auth_controller.dart';
 
 class LinkPartnerScreen extends ConsumerStatefulWidget {
   const LinkPartnerScreen({super.key});
@@ -26,20 +26,23 @@ class _LinkPartnerScreenState extends ConsumerState<LinkPartnerScreen> {
   }
 
   Future<void> _createCouple() async {
-    final user = ref.read(currentUserProvider);
-    if (user == null) return;
+    final fbUser = FirebaseAuth.instance.currentUser;
+    if (fbUser == null) {
+      setState(() => _errorMessage = 'ユーザーがログインしていません');
+      return;
+    }
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
     try {
-      final couple = await ref.read(coupleControllerProvider.notifier).createCouple(user.uid);
+      final couple = await ref.read(coupleControllerProvider.notifier).createCouple(fbUser.uid);
       if (mounted) {
         setState(() => _generatedCode = couple.inviteCode);
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _errorMessage = e.toString());
+        setState(() => _errorMessage = '$e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -47,8 +50,11 @@ class _LinkPartnerScreenState extends ConsumerState<LinkPartnerScreen> {
   }
 
   Future<void> _joinCouple() async {
-    final user = ref.read(currentUserProvider);
-    if (user == null) return;
+    final fbUser = FirebaseAuth.instance.currentUser;
+    if (fbUser == null) {
+      setState(() => _errorMessage = 'ユーザーがログインしていません');
+      return;
+    }
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -56,14 +62,14 @@ class _LinkPartnerScreenState extends ConsumerState<LinkPartnerScreen> {
     try {
       final couple = await ref.read(coupleControllerProvider.notifier).joinCouple(
             _codeController.text.trim(),
-            user.uid,
+            fbUser.uid,
           );
       if (couple == null && mounted) {
         setState(() => _errorMessage = '招待コードが無効です');
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _errorMessage = e.toString());
+        setState(() => _errorMessage = '$e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
