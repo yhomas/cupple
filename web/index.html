@@ -19,6 +19,31 @@
   <title>Cupple - 夫婦の感謝共有アプリ</title>
   <link rel="manifest" href="manifest.json">
 
+  <style>
+    #loading {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      z-index: 9999;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #loading .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid #e0e0e0;
+      border-top-color: #6200ee;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading p { color: #666; font-size: 14px; margin: 4px 0; }
+    #loading .error { color: #d32f2f; font-size: 12px; max-width: 80%; text-align: center; }
+  </style>
+
   <!-- Firebase SDK for Flutter Web -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -26,6 +51,32 @@
   <script src="firebase-config.js"></script>
 </head>
 <body>
+  <div id="loading">
+    <div class="spinner"></div>
+    <p id="loading-text">読み込み中...</p>
+    <p id="loading-error" class="error" style="display:none;"></p>
+  </div>
+  <script>
+    var loadingDiv = document.getElementById('loading');
+    var loadingText = document.getElementById('loading-text');
+    var loadingError = document.getElementById('loading-error');
+
+    setTimeout(function() {
+      if (loadingDiv.style.display !== 'none') {
+        loadingText.textContent = '読み込みに時間がかかっています...';
+        loadingError.style.display = 'block';
+        loadingError.textContent = 'ページが読み込まれない場合は、ブラウザのコンソール（F12）を開いてエラーを確認してください。';
+      }
+    }, 15000);
+
+    window.addEventListener('flutter-first-frame', function () {
+      loadingDiv.style.display = 'none';
+    });
+
+    setTimeout(function() {
+      loadingDiv.style.display = 'none';
+    }, 30000);
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

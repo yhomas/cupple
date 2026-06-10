@@ -1,7 +1,4 @@
 
-
-
-
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,9 +25,9 @@ class CoupleRepository {
       createdAt: DateTime.now(),
     );
     await _db.collection('couples').doc(coupleId).set(couple.toJson());
-    await _db.collection('users').doc(userId).update({
+    await _db.collection('users').doc(userId).set({
       'coupleId': coupleId,
-    });
+    }, SetOptions(merge: true));
     return couple;
   }
 
@@ -46,13 +43,13 @@ class CoupleRepository {
     if (couple.userIds.length >= 2) return null;
     final updatedUserIds = [...couple.userIds, userId];
     await doc.reference.update({'userIds': updatedUserIds});
-    await _db.collection('users').doc(userId).update({
+    await _db.collection('users').doc(userId).set({
       'coupleId': couple.coupleId,
       'partnerUid': couple.userIds.first,
-    });
-    await _db.collection('users').doc(couple.userIds.first).update({
+    }, SetOptions(merge: true));
+    await _db.collection('users').doc(couple.userIds.first).set({
       'partnerUid': userId,
-    });
+    }, SetOptions(merge: true));
     return couple.copyWith(userIds: updatedUserIds);
   }
 
@@ -76,8 +73,4 @@ class CoupleRepository {
 final coupleRepositoryProvider = Provider<CoupleRepository>((ref) {
   return CoupleRepository(FirebaseFirestore.instance);
 });
-
-
-
-
 
