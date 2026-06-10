@@ -1,5 +1,5 @@
-
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/debug/debug_log.dart';
 import '../data/auth_repository.dart';
 import '../domain/user_model.dart';
@@ -13,6 +13,14 @@ class AuthController extends _$AuthController {
     final repo = ref.watch(authRepositoryProvider);
     return repo.authStateChanges.asyncMap((fbUser) async {
       if (fbUser == null) return null;
+      try {
+        final doc = await FirebaseFirestore.instance.collection('users').doc(fbUser.uid).get();
+        if (doc.exists && doc.data() != null) {
+          return UserModel.fromJson(doc.data()!);
+        }
+      } catch (e) {
+        dlog("AuthController.build: Firestore read error: $e");
+      }
       return UserModel(
         uid: fbUser.uid,
         displayName: fbUser.displayName ?? '',
@@ -53,4 +61,3 @@ UserModel? currentUser(CurrentUserRef ref) {
     error: (_, _) => null,
   );
 }
-
