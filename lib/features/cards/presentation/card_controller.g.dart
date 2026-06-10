@@ -6,7 +6,7 @@ part of 'card_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$timelineCardsHash() => r'390d7d5f46dbc85207f13cc4f851ccec494acbcc';
+String _$timelineCardsHash() => r'fb323f2fe28921ced506e01e27ebe003dc98ab3d';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -147,7 +147,7 @@ class _TimelineCardsProviderElement
   String get coupleId => (origin as TimelineCardsProvider).coupleId;
 }
 
-String _$cardControllerHash() => r'390d2c1b9dfdac9e3e46ee564132dd25916ec3ad';
+String _$cardControllerHash() => r'9b8e861957c61472ac947dbd12c016e54accd1b5';
 
 /// See also [CardController].
 @ProviderFor(CardController)

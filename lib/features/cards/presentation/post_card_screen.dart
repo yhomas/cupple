@@ -1,30 +1,9 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/widgets/max_width_container.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/debug/debug_log.dart';
 import '../domain/card_model.dart';
 import 'card_controller.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -66,13 +45,22 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
   }
 
   Future<void> _submit() async {
+    dlog("_submit: START");
     final user = ref.read(currentUserProvider);
-    if (user == null || user.coupleId == null) return;
-    if (_contentController.text.trim().isEmpty) return;
+    dlog("_submit: user=$user, coupleId=${user?.coupleId}");
+    if (user == null || user.coupleId == null) {
+      dlog("_submit: user or coupleId is null, returning");
+      return;
+    }
+    if (_contentController.text.trim().isEmpty) {
+      dlog("_submit: content is empty, returning");
+      return;
+    }
 
     setState(() => _isLoading = true);
     try {
       final type = _tabController.index == 0 ? CardType.thankYou : CardType.didIt;
+      dlog("_submit: calling createCard, type=$type, category=$_selectedCategory");
       await ref.read(cardControllerProvider.notifier).createCard(
             coupleId: user.coupleId!,
             senderId: user.uid,
@@ -81,8 +69,11 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
             content: _contentController.text.trim(),
             stamp: _selectedStamp,
           );
+      dlog("_submit: createCard DONE, navigating to /");
       if (mounted) context.go('/');
-    } catch (e) {
+    } catch (e, st) {
+      dlog("_submit: ERROR: $e");
+      dlog("_submit: STACK: $st");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('エラー: $e')),
@@ -90,6 +81,7 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+      dlog("_submit: FINALLY");
     }
   }
 
@@ -185,28 +177,3 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
