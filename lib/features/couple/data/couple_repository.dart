@@ -1,7 +1,9 @@
 
+
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/debug/debug_log.dart';
 import '../../auth/domain/user_model.dart';
 import '../domain/couple_model.dart';
 
@@ -16,41 +18,60 @@ class CoupleRepository {
   }
 
   Future<CoupleModel> createCouple(String userId) async {
+    dlog("CoupleRepository.createCouple: START, userId=$userId");
     final coupleId = _db.collection('couples').doc().id;
     final inviteCode = _generateInviteCode();
+    dlog("CoupleRepository.createCouple: coupleId=$coupleId, code=$inviteCode");
     final couple = CoupleModel(
       coupleId: coupleId,
       userIds: [userId],
       inviteCode: inviteCode,
       createdAt: DateTime.now(),
     );
-    await _db.collection('couples').doc(coupleId).set(couple.toJson());
-    await _db.collection('users').doc(userId).set({
-      'coupleId': coupleId,
-    }, SetOptions(merge: true));
+    try {
+      await _db.collection('couples').doc(coupleId).set(couple.toJson());
+      dlog("CoupleRepository.createCouple: couples doc set OK");
+      await _db.collection('users').doc(userId).set({
+        'coupleId': coupleId,
+      }, SetOptions(merge: true));
+      dlog("CoupleRepository.createCouple: user doc updated OK");
+    } catch (e, st) {
+      dlog("CoupleRepository.createCouple: ERROR: $e");
+      dlog("CoupleRepository.createCouple: STACK: $st");
+      rethrow;
+    }
     return couple;
   }
 
   Future<CoupleModel?> joinCouple(String inviteCode, String userId) async {
-    final query = await _db
-        .collection('couples')
-        .where('inviteCode', isEqualTo: inviteCode)
-        .limit(1)
-        .get();
-    if (query.docs.isEmpty) return null;
-    final doc = query.docs.first;
-    final couple = CoupleModel.fromJson(doc.data());
-    if (couple.userIds.length >= 2) return null;
-    final updatedUserIds = [...couple.userIds, userId];
-    await doc.reference.update({'userIds': updatedUserIds});
-    await _db.collection('users').doc(userId).set({
-      'coupleId': couple.coupleId,
-      'partnerUid': couple.userIds.first,
-    }, SetOptions(merge: true));
-    await _db.collection('users').doc(couple.userIds.first).set({
-      'partnerUid': userId,
-    }, SetOptions(merge: true));
-    return couple.copyWith(userIds: updatedUserIds);
+    dlog("CoupleRepository.joinCouple: START, code=$inviteCode, userId=$userId");
+    try {
+      final query = await _db
+          .collection('couples')
+          .where('inviteCode', isEqualTo: inviteCode)
+          .limit(1)
+          .get();
+      dlog("CoupleRepository.joinCouple: query result count=${query.docs.length}");
+      if (query.docs.isEmpty) return null;
+      final doc = query.docs.first;
+      final couple = CoupleModel.fromJson(doc.data());
+      if (couple.userIds.length >= 2) return null;
+      final updatedUserIds = [...couple.userIds, userId];
+      await doc.reference.update({'userIds': updatedUserIds});
+      await _db.collection('users').doc(userId).set({
+        'coupleId': couple.coupleId,
+        'partnerUid': couple.userIds.first,
+      }, SetOptions(merge: true));
+      await _db.collection('users').doc(couple.userIds.first).set({
+        'partnerUid': userId,
+      }, SetOptions(merge: true));
+      dlog("CoupleRepository.joinCouple: SUCCESS");
+      return couple.copyWith(userIds: updatedUserIds);
+    } catch (e, st) {
+      dlog("CoupleRepository.joinCouple: ERROR: $e");
+      dlog("CoupleRepository.joinCouple: STACK: $st");
+      rethrow;
+    }
   }
 
   Future<CoupleModel?> getCouple(String coupleId) async {
@@ -73,4 +94,5 @@ class CoupleRepository {
 final coupleRepositoryProvider = Provider<CoupleRepository>((ref) {
   return CoupleRepository(FirebaseFirestore.instance);
 });
+
 

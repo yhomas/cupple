@@ -6,7 +6,7 @@ part of 'couple_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$coupleControllerHash() => r'82835c261e5156ea01e63236e354f720bbfe7d00';
+String _$coupleControllerHash() => r'9b19d69d2f04159fc99ee401aabb553d04ab18d3';
 
 /// See also [CoupleController].
 @ProviderFor(CoupleController)
