@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/debug/debug_log.dart';
 import '../../../../core/widgets/max_width_container.dart';
@@ -57,9 +58,9 @@ class _LinkPartnerScreenState extends ConsumerState<LinkPartnerScreen> {
 
   Future<void> _joinCouple() async {
     final fbUser = FirebaseAuth.instance.currentUser;
-    dlog("_createCouple: fbUser = ${fbUser?.uid ?? "null"}");
+    dlog("_joinCouple: fbUser = ${fbUser?.uid ?? "null"}");
     if (fbUser == null) {
-      dlog("_createCouple: user is NULL, returning");
+      dlog("_joinCouple: user is NULL, returning");
       setState(() => _errorMessage = 'ユーザーがログインしていません');
       return;
     }
@@ -74,10 +75,13 @@ class _LinkPartnerScreenState extends ConsumerState<LinkPartnerScreen> {
           );
       if (couple == null && mounted) {
         setState(() => _errorMessage = '招待コードが無効です');
+      } else if (couple != null && mounted) {
+        dlog("_joinCouple: SUCCESS, navigating to /");
+        context.go('/');
       }
     } catch (e) {
       if (mounted) {
-        dlog('_createCouple: ERROR: $e');
+        dlog('_joinCouple: ERROR: $e');
         setState(() => _errorMessage = '$e');
       }
     } finally {
