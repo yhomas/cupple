@@ -225,7 +225,7 @@ class _CardTile extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       card.type == CardType.thankYou
-                          ? '${card.senderName ?? "パートナー"}さんがあなたの${CardModel.categoryLabel(card.category)}に感謝しています！'
+                          ? '${card.senderName ?? "パートナー"}さんが${card.content}に感謝しています！'
                           : '${card.senderName ?? "パートナー"}さんが${card.content}をしました！',
                       style: theme.textTheme.bodyLarge,
                     ),
