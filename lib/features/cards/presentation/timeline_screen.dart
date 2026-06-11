@@ -24,6 +24,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../domain/card_model.dart';
 import 'card_controller.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../couple/data/couple_repository.dart';
 
 class TimelineScreen extends ConsumerWidget {
   const TimelineScreen({super.key});
@@ -82,7 +83,7 @@ class TimelineScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemCount: cards.length,
                 itemBuilder: (context, index) {
-                  return _CardTile(card: cards[index], myUid: user.uid);
+                  return _CardTile(card: cards[index], myUid: user.uid, coupleId: user.coupleId);
                 },
               );
             },
@@ -95,26 +96,52 @@ class TimelineScreen extends ConsumerWidget {
   }
 }
 
-class _CardTile extends ConsumerWidget {
+class _CardTile extends ConsumerStatefulWidget {
   final CardModel card;
   final String myUid;
-  const _CardTile({required this.card, required this.myUid});
-
-  static const _reactionEmojis = ['❤️', '👍', '🎉', '✨', '🙏'];
+  final String? coupleId;
+  const _CardTile({required this.card, required this.myUid, this.coupleId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_CardTile> createState() => _CardTileState();
+}
+
+class _CardTileState extends ConsumerState<_CardTile> {
+  static const _reactionEmojis = ['❤️', '👍', '🎉', '✨', '🙏'];
+  String? _partnerName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPartnerName();
+  }
+
+  Future<void> _loadPartnerName() async {
+    if (widget.coupleId == null) return;
+    final repo = ref.read(coupleRepositoryProvider);
+    final partner = await repo.getPartner(widget.coupleId!, widget.myUid);
+    if (mounted && partner != null) {
+      setState(() {
+        _partnerName = partner.displayName.isNotEmpty ? partner.displayName : 'パートナー';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ref = this.ref;
     final theme = Theme.of(context);
-    final isMine = card.senderId == myUid;
+    final isMine = widget.card.senderId == widget.myUid;
+    final partnerName = _partnerName ?? 'パートナー';
 
     return Dismissible(
-      key: Key(card.cardId),
-      direction: (!isMine && !card.isAcknowledged)
+      key: Key(widget.card.cardId),
+      direction: (!isMine && !widget.card.isAcknowledged)
           ? DismissDirection.startToEnd
           : DismissDirection.none,
       confirmDismiss: (_) async {
         ref.read(cardControllerProvider.notifier).acknowledgeCard(
-              card.cardId,
+              widget.card.cardId,
               '❤️',
             );
         return false;
@@ -156,8 +183,8 @@ class _CardTile extends ConsumerWidget {
                         ? AppColors.mintGreen
                         : AppColors.pastelPinkLight,
                     child: Text(
-                      (card.senderName?.isNotEmpty == true)
-                          ? card.senderName![0].toUpperCase()
+                      (widget.card.senderName?.isNotEmpty == true)
+                          ? widget.card.senderName![0].toUpperCase()
                           : (isMine ? '私' : '?'),
                       style: TextStyle(
                         fontSize: 14,
@@ -170,7 +197,7 @@ class _CardTile extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    card.senderName ?? (isMine ? '私' : 'パートナー'),
+                    widget.card.senderName ?? (isMine ? '私' : 'パートナー'),
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: AppColors.darkText,
@@ -186,7 +213,7 @@ class _CardTile extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      CardModel.typeLabel(card.type),
+                      CardModel.typeLabel(widget.card.type),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: isMine
                             ? AppColors.darkText
@@ -202,14 +229,14 @@ class _CardTile extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      CardModel.categoryLabel(card.category),
+                      CardModel.categoryLabel(widget.card.category),
                       style: theme.textTheme.labelSmall,
                     ),
                   ),
                   const Spacer(),
-                  if (card.isAcknowledged)
+                  if (widget.card.isAcknowledged)
                     Text(
-                      card.acknowledgementEmoji ?? '❤️',
+                      widget.card.acknowledgementEmoji ?? '❤️',
                       style: const TextStyle(fontSize: 20),
                     ),
                 ],
@@ -218,15 +245,19 @@ class _CardTile extends ConsumerWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (card.stamp != null) ...[
-                    Text(card.stamp!, style: const TextStyle(fontSize: 24)),
+                  if (widget.card.stamp != null) ...[
+                    Text(widget.card.stamp!, style: const TextStyle(fontSize: 24)),
                     const SizedBox(width: 8),
                   ],
                   Expanded(
                     child: Text(
-                      card.type == CardType.thankYou
-                          ? '${card.senderName ?? "パートナー"}さんがあなたの${card.content}に感謝しています！'
-                          : '${card.senderName ?? "パートナー"}さんが${card.content}をしました！',
+                      widget.card.type == CardType.thankYou
+                          ? (isMine
+                              ? '${widget.card.senderName ?? "あなた"}は$partnerNameの${widget.card.content}に感謝しています！'
+                              : '${widget.card.senderName ?? "パートナー"}さんがあなたの${widget.card.content}に感謝しています！')
+                          : (isMine
+                              ? '${widget.card.senderName ?? "あなた"}は${widget.card.content}をしました！'
+                              : '${widget.card.senderName ?? "パートナー"}さんが${widget.card.content}をしました！'),
                       style: theme.textTheme.bodyLarge,
                     ),
                   ),
@@ -234,12 +265,12 @@ class _CardTile extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                _formatTime(card.createdAt),
+                _formatTime(widget.card.createdAt),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: AppColors.mediumGray,
                 ),
               ),
-              if (!isMine && !card.isAcknowledged) ...[
+              if (!isMine && !widget.card.isAcknowledged) ...[
                 const SizedBox(height: 12),
                 Row(
                   children: _reactionEmojis.map((emoji) {
@@ -248,7 +279,7 @@ class _CardTile extends ConsumerWidget {
                       child: InkWell(
                         onTap: () {
                           ref.read(cardControllerProvider.notifier).acknowledgeCard(
-                                card.cardId,
+                                widget.card.cardId,
                                 emoji,
                               );
                         },
