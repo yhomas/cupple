@@ -109,6 +109,12 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
         title: const Text('カードを投稿'),
         bottom: TabBar(
           controller: _tabController,
+          labelColor: AppColors.darkText,
+          unselectedLabelColor: AppColors.mediumGray,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
+          indicatorColor: AppColors.mintGreen,
+          indicatorWeight: 3,
           tabs: const [
             Tab(icon: Icon(Icons.favorite), text: 'ありがとう'),
             Tab(icon: Icon(Icons.star), text: 'やったよ'),
