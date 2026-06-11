@@ -51,21 +51,33 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
       dlog("_submit: coupleId is null");
       return;
     }
-    if (_contentController.text.trim().isEmpty) return;
+    final content = _contentController.text.trim();
+    if (content.isEmpty) {
+      dlog("_submit: content is empty");
+      return;
+    }
 
     setState(() => _isLoading = true);
     try {
       final type = _tabController.index == 0 ? CardType.thankYou : CardType.didIt;
-      await ref.read(cardControllerProvider.notifier).createCard(
-            coupleId: user.coupleId!,
-            senderId: user.uid,
-            type: type,
-            category: _selectedCategory,
-            content: _contentController.text.trim(),
-            stamp: _selectedStamp,
-          );
-      dlog("_submit: createCard DONE");
-      if (mounted) context.go('/');
+      dlog("_submit: reading cardControllerProvider...");
+      final cardController = ref.read(cardControllerProvider.notifier);
+      dlog("_submit: cardController=$cardController");
+      dlog("_submit: calling createCard type=$type category=$_selectedCategory content=$content");
+      await cardController.createCard(
+        coupleId: user.coupleId!,
+        senderId: user.uid,
+        type: type,
+        category: _selectedCategory,
+        content: content,
+        stamp: _selectedStamp,
+      );
+      dlog("_submit: createCard DONE, navigating to /");
+      if (mounted) {
+        context.go('/');
+      } else {
+        dlog("_submit: not mounted, skip navigation");
+      }
     } catch (e, st) {
       dlog("_submit: ERROR: $e");
       dlog("_submit: STACK: $st");
@@ -76,6 +88,7 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+      dlog("_submit: FINALLY");
     }
   }
 
