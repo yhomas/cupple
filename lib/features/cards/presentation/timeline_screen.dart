@@ -136,6 +136,14 @@ class _CardTile extends ConsumerWidget {
         ),
       ),
       child: Card(
+        color: isMine ? Colors.white : AppColors.softBeige,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: isMine ? AppColors.mintGreen : AppColors.pastelPinkLight,
+            width: 2,
+          ),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -145,8 +153,9 @@ class _CardTile extends ConsumerWidget {
                 children: [
                   CircleAvatar(
                     radius: 16,
-                    backgroundColor: isThankYou
-                        ? AppColors.pastelPinkLight
+                    backgroundColor: isMine
+                        ? AppColors.mintGreen
+                        : AppColors.pastelPinkLight,
                         : AppColors.warmOrangeLight,
                     child: Text(
                       (card.senderName?.isNotEmpty == true)
@@ -155,8 +164,9 @@ class _CardTile extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: isThankYou
-                            ? AppColors.pastelPinkDark
+                        color: isMine
+                            ? Colors.white
+                            : AppColors.pastelPinkDark,
                             : AppColors.warmOrangeDark,
                       ),
                     ),
@@ -166,39 +176,23 @@ class _CardTile extends ConsumerWidget {
                     card.senderName ?? (isMine ? '私' : 'パートナー'),
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.darkText,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: isThankYou
-                          ? AppColors.pastelPinkLight
-                          : AppColors.warmOrangeLight,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      CardModel.typeLabel(card.type),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: isThankYou
-                            ? AppColors.pastelPinkDark
-                            : AppColors.warmOrangeDark,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isMine
+                            ? AppColors.mintGreen.withValues(alpha: 0.2)
+                            : AppColors.pastelPinkLight,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        CardModel.typeLabel(card.type),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: isMine
+                              ? AppColors.darkText
+                              : AppColors.pastelPinkDark,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.mintGreen.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      CardModel.categoryLabel(card.category),
-                      style: theme.textTheme.labelSmall,
-                    ),
-                  ),
                   const Spacer(),
                   if (card.isAcknowledged)
                     Text(
