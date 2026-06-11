@@ -222,7 +222,14 @@ class _CardTile extends ConsumerWidget {
                     Text(card.stamp!, style: const TextStyle(fontSize: 24)),
                     const SizedBox(width: 8),
                   ],
-                  Expanded(child: Text(card.content, style: theme.textTheme.bodyLarge)),
+                  Expanded(
+                    child: Text(
+                      card.type == CardType.thankYou
+                          ? '${card.senderName ?? "パートナー"}さんがあなたの${CardModel.categoryLabel(card.category)}に感謝しています！'
+                          : '${card.senderName ?? "パートナー"}さんが${card.content}をしました！',
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),

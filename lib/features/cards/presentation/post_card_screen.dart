@@ -131,11 +131,13 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
                       controller: _contentController,
                       decoration: InputDecoration(
                         labelText: _tabController.index == 0
-                            ? '感謝の内容を書く'
-                            : 'やったことを書く',
-                        hintText: '例: 今日の夕飯を作りました！',
+                              ? 'あなたはなにに感謝していますか？'
+                              : 'あなたは何をしましたか？',
+                      hintText: _tabController.index == 0
+                          ? '例: 夕飯作り'
+                          : '例: ゴミ出し',
                       ),
-                      maxLines: 4,
+                      maxLines: 2,
                     ),
                     const SizedBox(height: 16),
                     Text('カテゴリー', style: theme.textTheme.titleSmall),
