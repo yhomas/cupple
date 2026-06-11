@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/widgets/max_width_container.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/debug/debug_log.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/domain/user_model.dart';
@@ -81,34 +82,46 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _pickAndUploadAvatar(
       BuildContext context, WidgetRef ref, UserModel user) async {
-    final picker = ImagePicker();
-    final xFile = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 512,
-      maxHeight: 512,
-      imageQuality: 80,
-    );
-    if (xFile == null) return;
-
-    final bytes = await xFile.readAsBytes();
-    if (!context.mounted) return;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
-
+    dlog("_pickAndUploadAvatar: START");
     try {
+      final picker = ImagePicker();
+      dlog("_pickAndUploadAvatar: calling pickImage...");
+      final xFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 80,
+      );
+      dlog("_pickAndUploadAvatar: xFile=$xFile");
+      if (xFile == null) {
+        dlog("_pickAndUploadAvatar: xFile is null, returning");
+        return;
+      }
+
+      dlog("_pickAndUploadAvatar: reading bytes...");
+      final bytes = await xFile.readAsBytes();
+      dlog("_pickAndUploadAvatar: bytes.length=${bytes.length}");
+      if (!context.mounted) return;
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
+
+      dlog("_pickAndUploadAvatar: calling updateAvatar...");
       await ref
           .read(authControllerProvider.notifier)
           .updateAvatar(user.uid, bytes);
+      dlog("_pickAndUploadAvatar: updateAvatar DONE");
       if (!context.mounted) return;
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('アイコン画像を更新しました')),
       );
-    } catch (e) {
+    } catch (e, st) {
+      dlog("_pickAndUploadAvatar: ERROR: $e");
+      dlog("_pickAndUploadAvatar: STACK: $st");
       if (!context.mounted) return;
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
