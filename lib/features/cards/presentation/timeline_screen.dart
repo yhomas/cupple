@@ -91,11 +91,6 @@ class TimelineScreen extends ConsumerWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/post'),
-        icon: const Icon(Icons.add),
-        label: const Text('投稿'),
-      ),
     );
   }
 }

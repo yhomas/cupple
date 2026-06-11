@@ -48,22 +48,80 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
-        path: '/',
-        builder: (context, state) => const TimelineScreen(),
-      ),
-      GoRoute(
         path: '/link-partner',
         builder: (context, state) => const LinkPartnerScreen(),
       ),
-      GoRoute(
-        path: '/post',
-        builder: (context, state) => const PostCardScreen(),
-      ),
-      GoRoute(
-        path: '/report',
-        builder: (context, state) => const ReportScreen(),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return ScaffoldWithNavBar(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (context, state) => const TimelineScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/post',
+                builder: (context, state) => const PostCardScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/report',
+                builder: (context, state) => const ReportScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );
 });
+
+class ScaffoldWithNavBar extends ConsumerWidget {
+  final StatefulNavigationShell navigationShell;
+
+  const ScaffoldWithNavBar({super.key, required this.navigationShell});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      body: navigationShell,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: navigationShell.currentIndex,
+        onDestinationSelected: (index) {
+          navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          );
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'ホーム',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.add_circle_outline),
+            selectedIcon: Icon(Icons.add_circle),
+            label: '投稿',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart_outlined),
+            selectedIcon: Icon(Icons.bar_chart),
+            label: 'レポート',
+          ),
+        ],
+      ),
+    );
+  }
+}
 
