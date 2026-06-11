@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/debug/debug_log.dart';
 import '../data/auth_repository.dart';
@@ -10,8 +11,8 @@ part 'auth_controller.g.dart';
 class AuthController extends _$AuthController {
   @override
   Stream<UserModel?> build() {
-    final repo = ref.watch(authRepositoryProvider);
-    return repo.authStateChanges.asyncMap((fbUser) async {
+    dlog("AuthController.build: starting stream");
+    return FirebaseAuth.instance.authStateChanges().asyncMap((fbUser) async {
       dlog("AuthController.build: fbUser=${fbUser?.uid}");
       if (fbUser == null) return null;
       try {
