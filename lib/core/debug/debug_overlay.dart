@@ -103,7 +103,7 @@ class _DebugOverlayState extends State<DebugOverlay> {
             ),
           ),
         Positioned(
-          top: 40,
+          top: MediaQuery.of(context).padding.top + 60,
           right: 8,
           child: GestureDetector(
             onTap: () => setState(() => _visible = !_visible),

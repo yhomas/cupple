@@ -54,6 +54,11 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
     final content = _contentController.text.trim();
     if (content.isEmpty) {
       dlog("_submit: content is empty");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('内容を入力してください')),
+        );
+      }
       return;
     }
 

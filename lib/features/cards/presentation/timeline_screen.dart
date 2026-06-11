@@ -60,33 +60,35 @@ class TimelineScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('タイムライン'), actions: [IconButton(icon: const Icon(Icons.logout), tooltip: 'ログアウト', onPressed: () async { await ref.read(authControllerProvider.notifier).signOut(); if (context.mounted) context.go('/login'); })]),
-      body: MaxWidthContainer(
-        child: cardsAsync.when(
-          data: (cards) {
-            if (cards.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.inbox_outlined, size: 64, color: AppColors.mediumGray),
-                    const SizedBox(height: 16),
-                    Text('まだカードがありません', style: theme.textTheme.titleMedium),
-                    const SizedBox(height: 8),
-                    Text('最初のカードを投稿しましょう！', style: theme.textTheme.bodyMedium),
-                  ],
-                ),
+      body: SafeArea(
+        child: MaxWidthContainer(
+          child: cardsAsync.when(
+            data: (cards) {
+              if (cards.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.inbox_outlined, size: 64, color: AppColors.mediumGray),
+                      const SizedBox(height: 16),
+                      Text('まだカードがありません', style: theme.textTheme.titleMedium),
+                      const SizedBox(height: 8),
+                      Text('最初のカードを投稿しましょう！', style: theme.textTheme.bodyMedium),
+                    ],
+                  ),
+                );
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: cards.length,
+                itemBuilder: (context, index) {
+                  return _CardTile(card: cards[index], myUid: user.uid);
+                },
               );
-            }
-            return ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: cards.length,
-              itemBuilder: (context, index) {
-                return _CardTile(card: cards[index], myUid: user.uid);
-              },
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('エラー: $e')),
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text('エラー: $e')),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
