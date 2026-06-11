@@ -1,3 +1,6 @@
+
+
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum CardType { thankYou, didIt }
@@ -39,7 +42,7 @@ class CardModel {
       coupleId: json['coupleId'] as String,
       senderId: json['senderId'] as String,
       senderName: json['senderName'] as String?,
-      senderPhotoUrl: json['senderPhotoUrl'] as String?,
+        senderPhotoUrl: json['senderPhotoUrl'] as String?,
       type: json['type'] == 'thank_you' ? CardType.thankYou : CardType.didIt,
       category: _parseCategory(json['category'] as String?),
       content: json['content'] as String? ?? '',
@@ -107,7 +110,7 @@ class CardModel {
       'coupleId': coupleId,
       'senderId': senderId,
       if (senderName != null) 'senderName': senderName,
-      if (senderPhotoUrl != null) 'senderPhotoUrl': senderPhotoUrl,
+        if (senderPhotoUrl != null) 'senderPhotoUrl': senderPhotoUrl,
       'type': type == CardType.thankYou ? 'thank_you' : 'did_it',
       'category': categoryToString(category),
       'content': content,
@@ -123,7 +126,7 @@ class CardModel {
     String? coupleId,
     String? senderId,
     String? senderName,
-    String? senderPhotoUrl,
+      String? senderPhotoUrl,
     CardType? type,
     CardCategory? category,
     String? content,
@@ -137,7 +140,7 @@ class CardModel {
       coupleId: coupleId ?? this.coupleId,
       senderId: senderId ?? this.senderId,
       senderName: senderName ?? this.senderName,
-      senderPhotoUrl: senderPhotoUrl ?? this.senderPhotoUrl,
+        senderPhotoUrl: senderPhotoUrl ?? this.senderPhotoUrl,
       type: type ?? this.type,
       category: category ?? this.category,
       content: content ?? this.content,
@@ -148,3 +151,6 @@ class CardModel {
     );
   }
 }
+
+
+

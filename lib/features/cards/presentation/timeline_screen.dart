@@ -182,18 +182,23 @@ class _CardTileState extends ConsumerState<_CardTile> {
                     backgroundColor: isMine
                         ? AppColors.mintGreen
                         : AppColors.pastelPinkLight,
-                    child: Text(
-                      (widget.card.senderName?.isNotEmpty == true)
-                          ? widget.card.senderName![0].toUpperCase()
-                          : (isMine ? '私' : '?'),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isMine
-                            ? Colors.white
-                            : AppColors.pastelPinkDark,
-                      ),
-                    ),
+                    backgroundImage: widget.card.senderPhotoUrl != null
+                        ? NetworkImage(widget.card.senderPhotoUrl!)
+                        : null,
+                    child: widget.card.senderPhotoUrl == null
+                        ? Text(
+                            (widget.card.senderName?.isNotEmpty == true)
+                                ? widget.card.senderName![0].toUpperCase()
+                                : (isMine ? '私' : '?'),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: isMine
+                                  ? Colors.white
+                                  : AppColors.pastelPinkDark,
+                            ),
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 8),
                   Text(

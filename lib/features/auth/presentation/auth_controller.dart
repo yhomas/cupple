@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -67,6 +68,14 @@ class AuthController extends _$AuthController {
     final repo = ref.read(authRepositoryProvider);
     await repo.updatePassword(currentPassword, newPassword);
     dlog("AuthController.updatePassword: DONE");
+  }
+
+  Future<void> updateAvatar(String uid, Uint8List imageBytes) async {
+    dlog("AuthController.updateAvatar: START");
+    final repo = ref.read(authRepositoryProvider);
+    final photoUrl = await repo.uploadAvatar(uid, imageBytes);
+    await repo.updatePhotoUrl(uid, photoUrl);
+    dlog("AuthController.updateAvatar: DONE");
   }
 }
 

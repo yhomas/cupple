@@ -19,6 +19,7 @@ class CardController extends _$CardController {
     required String content,
     String? stamp,
     String? senderName,
+      String? senderPhotoUrl,
   }) async {
     dlog("CardController.createCard: START, coupleId=$coupleId, senderId=$senderId, type=$type");
     try {
@@ -28,6 +29,7 @@ class CardController extends _$CardController {
         coupleId: coupleId,
         senderId: senderId,
         senderName: senderName,
+          senderPhotoUrl: senderPhotoUrl,
         type: type,
         category: category,
         content: content,

@@ -147,7 +147,7 @@ class _TimelineCardsProviderElement
   String get coupleId => (origin as TimelineCardsProvider).coupleId;
 }
 
-String _$cardControllerHash() => r'2d27a9a341df1d1688322451e03790f526f3652e';
+String _$cardControllerHash() => r'53c10b8b254614c550d27ccf866da23adf3c37b1';
 
 /// See also [CardController].
 @ProviderFor(CardController)

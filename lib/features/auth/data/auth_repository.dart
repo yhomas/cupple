@@ -1,6 +1,8 @@
 
+import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/debug/debug_log.dart';
 import '../domain/user_model.dart';
@@ -8,7 +10,9 @@ import '../domain/user_model.dart';
 class AuthRepository {
   final fb.FirebaseAuth _auth;
   final FirebaseFirestore _db;
-  AuthRepository(this._auth, this._db);
+  final FirebaseStorage _storage;
+  AuthRepository(this._auth, this._db, [FirebaseStorage? storage])
+      : _storage = storage ?? FirebaseStorage.instance;
 
   fb.User? get currentUser => _auth.currentUser;
   Stream<fb.User?> get authStateChanges => _auth.authStateChanges();
@@ -99,10 +103,28 @@ class AuthRepository {
     dlog("updatePassword: DONE");
   }
 
+  Future<String> uploadAvatar(String uid, Uint8List imageBytes) async {
+    dlog("uploadAvatar: uid=$uid");
+    final ref = _storage.ref().child('avatars/$uid.jpg');
+    final metadata = SettableMetadata(contentType: 'image/jpeg');
+    await ref.putData(imageBytes, metadata);
+    final url = await ref.getDownloadURL();
+    dlog("uploadAvatar: url=$url");
+    return url;
+  }
+
+  Future<void> updatePhotoUrl(String uid, String photoUrl) async {
+    dlog("updatePhotoUrl: uid=$uid");
+    await _db.collection('users').doc(uid).set({
+      'photoUrl': photoUrl,
+    }, SetOptions(merge: true));
+    dlog("updatePhotoUrl: DONE");
+  }
+
   bool get isEmailUser => _auth.currentUser?.email != null;
 }
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository(fb.FirebaseAuth.instance, FirebaseFirestore.instance);
+  return AuthRepository(fb.FirebaseAuth.instance, FirebaseFirestore.instance, FirebaseStorage.instance);
 });
 

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/widgets/max_width_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -29,11 +30,39 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Card(
                     child: ListTile(
+                      leading: CircleAvatar(
+                        radius: 24,
+                        backgroundColor: AppColors.pastelPinkLight,
+                        backgroundImage: user.photoUrl != null
+                            ? NetworkImage(user.photoUrl!)
+                            : null,
+                        child: user.photoUrl == null
+                            ? Text(
+                                user.displayName.isNotEmpty
+                                    ? user.displayName[0]
+                                    : '?',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 20),
+                              )
+                            : null,
+                      ),
+                      title: const Text('アイコン画像'),
+                      subtitle: Text(
+                          user.photoUrl != null ? '画像を変更' : '画像を設定'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () =>
+                          _pickAndUploadAvatar(context, ref, user),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Card(
+                    child: ListTile(
                       leading: const Icon(Icons.person_outline),
                       title: const Text('表示名'),
                       subtitle: Text(user.displayName),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => _showDisplayNameDialog(context, ref, user),
+                      onTap: () =>
+                          _showDisplayNameDialog(context, ref, user),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -48,6 +77,44 @@ class SettingsScreen extends ConsumerWidget {
               ),
       ),
     );
+  }
+
+  Future<void> _pickAndUploadAvatar(
+      BuildContext context, WidgetRef ref, UserModel user) async {
+    final picker = ImagePicker();
+    final xFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 512,
+      maxHeight: 512,
+      imageQuality: 80,
+    );
+    if (xFile == null) return;
+
+    final bytes = await xFile.readAsBytes();
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await ref
+          .read(authControllerProvider.notifier)
+          .updateAvatar(user.uid, bytes);
+      if (!context.mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('アイコン画像を更新しました')),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('エラー: $e')),
+      );
+    }
   }
 
   void _showDisplayNameDialog(
@@ -172,10 +239,17 @@ class _PartnerInfoCard extends ConsumerWidget {
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: AppColors.pastelPinkLight,
-              child: Text(
-                partner.displayName.isNotEmpty ? partner.displayName[0] : '?',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
+              backgroundImage: partner.photoUrl != null
+                  ? NetworkImage(partner.photoUrl!)
+                  : null,
+              child: partner.photoUrl == null
+                  ? Text(
+                      partner.displayName.isNotEmpty
+                          ? partner.displayName[0]
+                          : '?',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    )
+                  : null,
             ),
             title: Text(partner.displayName),
             subtitle: const Text('パートナー'),
@@ -345,3 +419,4 @@ class _AccountSection extends ConsumerWidget {
     );
   }
 }
+
