@@ -110,7 +110,7 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppColors.darkText,
-          unselectedLabelColor: AppColors.mediumGray,
+          unselectedLabelColor: const Color(0xFF757575),
           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
           indicatorColor: AppColors.mintGreen,
