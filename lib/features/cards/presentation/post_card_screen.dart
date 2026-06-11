@@ -46,10 +46,21 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
 
   Future<void> _submit() async {
     dlog("_submit: START");
-    final user = ref.read(currentUserProvider);
+    // Use watch to get the latest value, then read
+    final asyncUser = ref.read(authControllerProvider);
+    final user = asyncUser.when(
+      data: (u) => u,
+      loading: () => null,
+      error: (_, _) => null,
+    );
     dlog("_submit: user=$user, coupleId=${user?.coupleId}");
     if (user == null || user.coupleId == null) {
       dlog("_submit: user or coupleId is null, returning");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ユーザー情報を取得できません。もう一度お試しください。')),
+        );
+      }
       return;
     }
     if (_contentController.text.trim().isEmpty) {

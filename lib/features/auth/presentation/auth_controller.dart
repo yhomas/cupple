@@ -12,15 +12,18 @@ class AuthController extends _$AuthController {
   Stream<UserModel?> build() {
     final repo = ref.watch(authRepositoryProvider);
     return repo.authStateChanges.asyncMap((fbUser) async {
+      dlog("AuthController.build: fbUser=${fbUser?.uid}");
       if (fbUser == null) return null;
       try {
         final doc = await FirebaseFirestore.instance.collection('users').doc(fbUser.uid).get();
+        dlog("AuthController.build: doc.exists=${doc.exists}, data=${doc.data()}");
         if (doc.exists && doc.data() != null) {
           return UserModel.fromJson(doc.data()!);
         }
       } catch (e) {
         dlog("AuthController.build: Firestore read error: $e");
       }
+      dlog("AuthController.build: returning fallback UserModel (no coupleId)");
       return UserModel(
         uid: fbUser.uid,
         displayName: fbUser.displayName ?? '',
