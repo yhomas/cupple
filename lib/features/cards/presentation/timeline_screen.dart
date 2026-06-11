@@ -106,7 +106,6 @@ class _CardTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isMine = card.senderId == myUid;
-    final isThankYou = card.type == CardType.thankYou;
 
     return Dismissible(
       key: Key(card.cardId),
@@ -156,7 +155,6 @@ class _CardTile extends ConsumerWidget {
                     backgroundColor: isMine
                         ? AppColors.mintGreen
                         : AppColors.pastelPinkLight,
-                        : AppColors.warmOrangeLight,
                     child: Text(
                       (card.senderName?.isNotEmpty == true)
                           ? card.senderName![0].toUpperCase()
@@ -167,7 +165,6 @@ class _CardTile extends ConsumerWidget {
                         color: isMine
                             ? Colors.white
                             : AppColors.pastelPinkDark,
-                            : AppColors.warmOrangeDark,
                       ),
                     ),
                   ),
@@ -176,23 +173,39 @@ class _CardTile extends ConsumerWidget {
                     card.senderName ?? (isMine ? '私' : 'パートナー'),
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w600,
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
+                      color: AppColors.darkText,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isMine
+                          ? AppColors.mintGreen.withValues(alpha: 0.2)
+                          : AppColors.pastelPinkLight,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      CardModel.typeLabel(card.type),
+                      style: theme.textTheme.labelSmall?.copyWith(
                         color: isMine
-                            ? AppColors.mintGreen.withValues(alpha: 0.2)
-                            : AppColors.pastelPinkLight,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        CardModel.typeLabel(card.type),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: isMine
-                              ? AppColors.darkText
-                              : AppColors.pastelPinkDark,
-                        ),
+                            ? AppColors.darkText
+                            : AppColors.pastelPinkDark,
                       ),
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.mintGreen.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      CardModel.categoryLabel(card.category),
+                      style: theme.textTheme.labelSmall,
+                    ),
+                  ),
                   const Spacer(),
                   if (card.isAcknowledged)
                     Text(
