@@ -26,9 +26,20 @@ final routerProvider = Provider<GoRouter>((ref) {
       );
       final isAuthRoute = state.matchedLocation == '/login';
 
+      // ローディング中は現在の画面を維持
       if (isLoggedIn == null) return null;
-      if (!isLoggedIn && !isAuthRoute) return '/login';
-      if (isLoggedIn && isAuthRoute) return '/';
+
+      // 未ログイン: ログイン画面以外はログインへリダイレクト（元のページをクエリに保持）
+      if (!isLoggedIn && !isAuthRoute) {
+        return '/login?redirect=${Uri.encodeComponent(state.matchedLocation)}';
+      }
+
+      // ログイン済み: ログイン画面は元のページ（またはタイムライン）へリダイレクト
+      if (isLoggedIn && isAuthRoute) {
+        final redirectTo = state.uri.queryParameters['redirect'];
+        return redirectTo ?? '/';
+      }
+
       return null;
     },
     routes: [

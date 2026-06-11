@@ -54,10 +54,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             );
         dlog("_submit: signIn SUCCESS");
       }
-      // Navigate to home after successful auth
+      // Navigate to redirect target or home after successful auth
       if (mounted) {
-        dlog("_submit: navigating to /");
-        context.go('/');
+        final redirectTo = GoRouter.of(context).state.uri.queryParameters['redirect'];
+        dlog("_submit: navigating to ${redirectTo ?? '/'}");
+        context.go(redirectTo ?? '/');
       }
     } catch (e, st) {
       dlog("_submit: ERROR: $e");
