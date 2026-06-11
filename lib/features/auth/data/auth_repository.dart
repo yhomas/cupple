@@ -74,6 +74,32 @@ class AuthRepository {
   Future<void> signOut() async {
     await _auth.signOut();
   }
+
+  Future<void> updateDisplayName(String uid, String displayName) async {
+    dlog("updateDisplayName: uid=$uid, name=$displayName");
+    await _auth.currentUser?.updateDisplayName(displayName);
+    await _db.collection('users').doc(uid).set({
+      'displayName': displayName,
+    }, SetOptions(merge: true));
+    dlog("updateDisplayName: DONE");
+  }
+
+  Future<void> updatePassword(String currentPassword, String newPassword) async {
+    dlog("updatePassword: START");
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('ログインしていません');
+    final email = user.email;
+    if (email == null) throw Exception('メールアドレスが設定されていません');
+    final credential = fb.EmailAuthProvider.credential(
+      email: email,
+      password: currentPassword,
+    );
+    await user.reauthenticateWithCredential(credential);
+    await user.updatePassword(newPassword);
+    dlog("updatePassword: DONE");
+  }
+
+  bool get isEmailUser => _auth.currentUser?.email != null;
 }
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {

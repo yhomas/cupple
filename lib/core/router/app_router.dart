@@ -1,5 +1,4 @@
 
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +8,7 @@ import '../../features/couple/presentation/link_partner_screen.dart';
 import '../../features/cards/presentation/timeline_screen.dart';
 import '../../features/cards/presentation/post_card_screen.dart';
 import '../../features/report/presentation/report_screen.dart';
+import '../../features/settings/presentation/settings_screen.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -26,15 +26,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       );
       final isAuthRoute = state.matchedLocation == '/login';
 
-      // ローディング中は現在の画面を維持
       if (isLoggedIn == null) return null;
 
-      // 未ログイン: ログイン画面以外はログインへリダイレクト（元のページをクエリに保持）
       if (!isLoggedIn && !isAuthRoute) {
         return '/login?redirect=${Uri.encodeComponent(state.matchedLocation)}';
       }
 
-      // ログイン済み: ログイン画面は元のページ（またはタイムライン）へリダイレクト
       if (isLoggedIn && isAuthRoute) {
         final redirectTo = state.uri.queryParameters['redirect'];
         return redirectTo ?? '/';
@@ -80,6 +77,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/settings',
+                builder: (context, state) => const SettingsScreen(),
+              ),
+            ],
+          ),
         ],
       ),
     ],
@@ -118,6 +123,11 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             icon: Icon(Icons.bar_chart_outlined),
             selectedIcon: Icon(Icons.bar_chart),
             label: 'レポート',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings_outlined),
+            selectedIcon: Icon(Icons.settings),
+            label: '設定',
           ),
         ],
       ),

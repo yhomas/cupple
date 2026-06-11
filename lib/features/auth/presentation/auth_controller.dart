@@ -54,6 +54,20 @@ class AuthController extends _$AuthController {
     await repo.signOut();
     dlog("AuthController.signOut: DONE");
   }
+
+  Future<void> updateDisplayName(String uid, String displayName) async {
+    dlog("AuthController.updateDisplayName: START");
+    final repo = ref.read(authRepositoryProvider);
+    await repo.updateDisplayName(uid, displayName);
+    dlog("AuthController.updateDisplayName: DONE");
+  }
+
+  Future<void> updatePassword(String currentPassword, String newPassword) async {
+    dlog("AuthController.updatePassword: START");
+    final repo = ref.read(authRepositoryProvider);
+    await repo.updatePassword(currentPassword, newPassword);
+    dlog("AuthController.updatePassword: DONE");
+  }
 }
 
 @riverpod
