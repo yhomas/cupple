@@ -18,6 +18,7 @@ class CardController extends _$CardController {
     required CardCategory category,
     required String content,
     String? stamp,
+    String? senderName,
   }) async {
     dlog("CardController.createCard: START, coupleId=$coupleId, senderId=$senderId, type=$type");
     try {
@@ -26,6 +27,7 @@ class CardController extends _$CardController {
         cardId: FirebaseFirestore.instance.collection('cards').doc().id,
         coupleId: coupleId,
         senderId: senderId,
+        senderName: senderName,
         type: type,
         category: category,
         content: content,

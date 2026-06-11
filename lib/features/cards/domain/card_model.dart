@@ -11,6 +11,7 @@ class CardModel {
   final String cardId;
   final String coupleId;
   final String senderId;
+  final String? senderName;
   final CardType type;
   final CardCategory category;
   final String content;
@@ -23,6 +24,7 @@ class CardModel {
     required this.cardId,
     required this.coupleId,
     required this.senderId,
+    this.senderName,
     required this.type,
     required this.category,
     required this.content,
@@ -37,6 +39,7 @@ class CardModel {
       cardId: json['cardId'] as String,
       coupleId: json['coupleId'] as String,
       senderId: json['senderId'] as String,
+      senderName: json['senderName'] as String?,
       type: json['type'] == 'thank_you' ? CardType.thankYou : CardType.didIt,
       category: _parseCategory(json['category'] as String?),
       content: json['content'] as String? ?? '',
@@ -103,6 +106,7 @@ class CardModel {
       'cardId': cardId,
       'coupleId': coupleId,
       'senderId': senderId,
+      if (senderName != null) 'senderName': senderName,
       'type': type == CardType.thankYou ? 'thank_you' : 'did_it',
       'category': categoryToString(category),
       'content': content,
@@ -117,6 +121,7 @@ class CardModel {
     String? cardId,
     String? coupleId,
     String? senderId,
+    String? senderName,
     CardType? type,
     CardCategory? category,
     String? content,
@@ -129,6 +134,7 @@ class CardModel {
       cardId: cardId ?? this.cardId,
       coupleId: coupleId ?? this.coupleId,
       senderId: senderId ?? this.senderId,
+      senderName: senderName ?? this.senderName,
       type: type ?? this.type,
       category: category ?? this.category,
       content: content ?? this.content,

@@ -76,6 +76,7 @@ class _PostCardScreenState extends ConsumerState<PostCardScreen>
         category: _selectedCategory,
         content: content,
         stamp: _selectedStamp,
+        senderName: user.displayName,
       );
       dlog("_submit: createCard DONE, navigating to /");
       if (mounted) {

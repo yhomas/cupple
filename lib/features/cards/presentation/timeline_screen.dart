@@ -148,12 +148,25 @@ class _CardTile extends ConsumerWidget {
                     backgroundColor: isThankYou
                         ? AppColors.pastelPinkLight
                         : AppColors.warmOrangeLight,
-                    child: Icon(
-                      isThankYou ? Icons.favorite : Icons.star,
-                      size: 16,
-                      color: isThankYou
-                          ? AppColors.pastelPinkDark
-                          : AppColors.warmOrangeDark,
+                    child: Text(
+                      (card.senderName?.isNotEmpty == true)
+                          ? card.senderName![0].toUpperCase()
+                          : (isMine ? '私' : '?'),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isThankYou
+                            ? AppColors.pastelPinkDark
+                            : AppColors.warmOrangeDark,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    card.senderName ?? (isMine ? '私' : 'パートナー'),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.darkText,
                     ),
                   ),
                   const SizedBox(width: 8),
