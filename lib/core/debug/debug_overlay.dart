@@ -78,23 +78,19 @@ class _DebugOverlayState extends State<DebugOverlay> {
         Positioned(
           top: 40,
           right: 8,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                DebugLog.add("DEBUG button tapped!");
-                setState(() => _visible = !_visible);
-              },
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: _visible ? Colors.yellow : Colors.black54,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: Text(_visible ? 'DEBUG X' : 'DEBUG', style: TextStyle(color: _visible ? Colors.black : Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+          child: GestureDetector(
+            onTap: () {
+              DebugLog.add("DEBUG button tapped!");
+              setState(() => _visible = !_visible);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: _visible ? Colors.yellow : Colors.black54,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.white24),
               ),
+              child: Text(_visible ? 'DEBUG X' : 'DEBUG', style: TextStyle(color: _visible ? Colors.black : Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
             ),
           ),
         ),
