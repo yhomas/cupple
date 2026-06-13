@@ -1,8 +1,15 @@
-
-
 {
   "projects": {
     "default": "cupple-app-a9194"
-  }
+  },
+  "targets": {
+    "cupple-app-a9194": {
+      "hosting": {
+        "cupple-web": [
+          "cupple-app-a9194"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
-
