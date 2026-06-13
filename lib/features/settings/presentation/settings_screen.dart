@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -102,9 +103,7 @@ class SettingsScreen extends ConsumerWidget {
       dlog("_pickAndUploadAvatar: bytes.length=${bytes.length}");
       if (!context.mounted) return;
 
-      // Capture navigator before async gap
-      final navigator = Navigator.of(context);
-
+      // Show loading dialog
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -117,12 +116,17 @@ class SettingsScreen extends ConsumerWidget {
           .updateAvatar(user.uid, bytes);
       dlog("_pickAndUploadAvatar: updateAvatar DONE");
 
-      // Invalidate to refresh user data
-      ref.invalidate(authControllerProvider);
+      // Dismiss loading dialog FIRST before invalidating
+      if (context.mounted) {
+        dlog("_pickAndUploadAvatar: dismissing loading dialog");
+        Navigator.of(context).pop();
+      }
 
-      // Always dismiss loading dialog
-      dlog("_pickAndUploadAvatar: dismissing loading dialog");
-      navigator.pop();
+      // Invalidate after dialog is dismissed (post-frame to avoid conflict)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        dlog("_pickAndUploadAvatar: invalidating authControllerProvider");
+        ref.invalidate(authControllerProvider);
+      });
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -133,7 +137,7 @@ class SettingsScreen extends ConsumerWidget {
       dlog("_pickAndUploadAvatar: ERROR: $e");
       dlog("_pickAndUploadAvatar: STACK: $st");
       if (context.mounted) {
-        Navigator.pop(context);
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('エラー: $e')),
         );
@@ -443,3 +447,4 @@ class _AccountSection extends ConsumerWidget {
     );
   }
 }
+
