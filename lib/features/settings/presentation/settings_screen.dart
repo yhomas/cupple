@@ -31,6 +31,7 @@ class SettingsScreen extends ConsumerWidget {
                   Card(
                     child: ListTile(
                       leading: CircleAvatar(
+                        key: ValueKey(user.photoUrl),
                         radius: 24,
                         backgroundColor: AppColors.pastelPinkLight,
                         backgroundImage: user.photoUrl != null

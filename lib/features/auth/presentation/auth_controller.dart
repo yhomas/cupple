@@ -81,8 +81,10 @@ class AuthController extends _$AuthController {
       await repo.updatePhotoUrl(uid, photoUrl);
       dlog("AuthController.updateAvatar: DONE");
       // Update state directly to avoid invalidate causing navigator conflict
+      // Use AsyncLoading first to ensure Riverpod detects the change
       final current = state.valueOrNull;
       if (current != null) {
+        state = const AsyncLoading();
         state = AsyncData(current.copyWith(photoUrl: photoUrl));
         dlog("AuthController.updateAvatar: state updated directly");
       }
