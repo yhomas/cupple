@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,29 +11,45 @@ part 'auth_controller.g.dart';
 
 @riverpod
 class AuthController extends _$AuthController {
+  StreamSubscription<dynamic>? _userSub;
+
   @override
   Stream<UserModel?> build() {
     dlog("AuthController.build: starting stream");
-    return FirebaseAuth.instance.authStateChanges().asyncMap((fbUser) async {
-      dlog("AuthController.build: fbUser=${fbUser?.uid}");
-      if (fbUser == null) return null;
-      try {
-        final doc = await FirebaseFirestore.instance.collection('users').doc(fbUser.uid).get();
-        dlog("AuthController.build: doc.exists=${doc.exists}, data=${doc.data()}");
-        if (doc.exists && doc.data() != null) {
-          return UserModel.fromJson(doc.data()!);
-        }
-      } catch (e) {
-        dlog("AuthController.build: Firestore read error: $e");
+    final controller = StreamController<UserModel?>();
+
+    // Listen to auth state changes
+    FirebaseAuth.instance.authStateChanges().listen((fbUser) async {
+      dlog("AuthController.build: authStateChanges fbUser=${fbUser?.uid}");
+      await _userSub?.cancel();
+      if (fbUser == null) {
+        controller.add(null);
+        return;
       }
-      dlog("AuthController.build: returning fallback UserModel (no coupleId)");
-      return UserModel(
-        uid: fbUser.uid,
-        displayName: fbUser.displayName ?? '',
-        photoUrl: fbUser.photoURL,
-        createdAt: DateTime.now(),
-      );
+      // Listen to Firestore document snapshots
+      _userSub = FirebaseFirestore.instance
+          .collection('users')
+          .doc(fbUser.uid)
+          .snapshots()
+          .listen((snap) {
+        dlog("AuthController.build: snapshot received, exists=${snap.exists}");
+        if (snap.exists && snap.data() != null) {
+          final user = UserModel.fromJson(snap.data()!);
+          controller.add(user);
+        } else {
+          controller.add(null);
+        }
+      }, onError: (e) {
+        dlog("AuthController.build: snapshot error: $e");
+        controller.add(null);
+      });
     });
+
+    controller.onCancel = () {
+      _userSub?.cancel();
+    };
+
+    return controller.stream;
   }
 
   Future<void> signIn(String email, String password) async {
@@ -79,16 +96,7 @@ class AuthController extends _$AuthController {
       dlog("AuthController.updateAvatar: photoUrl=$photoUrl");
       dlog("AuthController.updateAvatar: calling updatePhotoUrl...");
       await repo.updatePhotoUrl(uid, photoUrl);
-      dlog("AuthController.updateAvatar: DONE");
-      // Update state directly to avoid invalidate causing navigator conflict
-      final current = state.valueOrNull;
-      if (current != null) {
-        final newUser = current.copyWith(photoUrl: photoUrl);
-        // Use microtask to ensure Riverpod detects the change
-        await Future.delayed(Duration.zero);
-        state = AsyncData(newUser);
-        dlog("AuthController.updateAvatar: state updated directly");
-      }
+      dlog("AuthController.updateAvatar: DONE - Firestore updated, stream will auto-refresh");
     } catch (e, st) {
       dlog("AuthController.updateAvatar: ERROR: $e");
       dlog("AuthController.updateAvatar: STACK: $st");
