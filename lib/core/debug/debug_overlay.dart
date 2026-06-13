@@ -103,17 +103,18 @@ class _DebugOverlayState extends State<DebugOverlay> {
             ),
           ),
         Positioned(
-          top: MediaQuery.of(context).padding.top + 60,
+          bottom: 80,
           right: 8,
           child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
             onTap: () => setState(() => _visible = !_visible),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: _visible ? Colors.yellow : Colors.black54,
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(_visible ? 'DEBUG ✕' : 'DEBUG', style: TextStyle(color: _visible ? Colors.black : Colors.white, fontSize: 10)),
+              child: Text(_visible ? 'DEBUG ✕' : 'DEBUG', style: TextStyle(color: _visible ? Colors.black : Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
             ),
           ),
         ),
