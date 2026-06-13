@@ -80,6 +80,12 @@ class AuthController extends _$AuthController {
       dlog("AuthController.updateAvatar: calling updatePhotoUrl...");
       await repo.updatePhotoUrl(uid, photoUrl);
       dlog("AuthController.updateAvatar: DONE");
+      // Update state directly to avoid invalidate causing navigator conflict
+      final current = state.valueOrNull;
+      if (current != null) {
+        state = AsyncData(current.copyWith(photoUrl: photoUrl));
+        dlog("AuthController.updateAvatar: state updated directly");
+      }
     } catch (e, st) {
       dlog("AuthController.updateAvatar: ERROR: $e");
       dlog("AuthController.updateAvatar: STACK: $st");

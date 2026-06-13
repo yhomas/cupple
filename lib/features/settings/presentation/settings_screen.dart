@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -116,18 +115,18 @@ class SettingsScreen extends ConsumerWidget {
           .updateAvatar(user.uid, bytes);
       dlog("_pickAndUploadAvatar: updateAvatar DONE");
 
-      // Dismiss loading dialog FIRST before invalidating
+      // Dismiss loading dialog FIRST - always try regardless of mounted state
+      dlog("_pickAndUploadAvatar: dismissing loading dialog");
       if (context.mounted) {
-        dlog("_pickAndUploadAvatar: dismissing loading dialog");
-        Navigator.of(context).pop();
+        try {
+          Navigator.of(context, rootNavigator: true).pop();
+          dlog("_pickAndUploadAvatar: dialog dismissed successfully");
+        } catch (navErr) {
+          dlog("_pickAndUploadAvatar: nav pop error (ignored): $navErr");
+        }
       }
 
-      // Invalidate after dialog is dismissed (post-frame to avoid conflict)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        dlog("_pickAndUploadAvatar: invalidating authControllerProvider");
-        ref.invalidate(authControllerProvider);
-      });
-
+      // State is already updated by authController, no invalidate needed
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('アイコン画像を更新しました')),
@@ -137,7 +136,9 @@ class SettingsScreen extends ConsumerWidget {
       dlog("_pickAndUploadAvatar: ERROR: $e");
       dlog("_pickAndUploadAvatar: STACK: $st");
       if (context.mounted) {
-        Navigator.of(context).pop();
+        try {
+          Navigator.of(context, rootNavigator: true).pop();
+        } catch (_) {}
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('エラー: $e')),
         );
@@ -447,4 +448,3 @@ class _AccountSection extends ConsumerWidget {
     );
   }
 }
-
