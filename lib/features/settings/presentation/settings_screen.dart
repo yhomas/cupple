@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -73,7 +72,7 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
                   Text('アカウント', style: theme.textTheme.titleMedium),
                   const SizedBox(height: 8),
-                  _AccountSection(),
+                  const _AccountSection(),
                 ],
               ),
       ),
@@ -103,6 +102,9 @@ class SettingsScreen extends ConsumerWidget {
       dlog("_pickAndUploadAvatar: bytes.length=${bytes.length}");
       if (!context.mounted) return;
 
+      // Capture navigator before async gap
+      final navigator = Navigator.of(context);
+
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -114,19 +116,28 @@ class SettingsScreen extends ConsumerWidget {
           .read(authControllerProvider.notifier)
           .updateAvatar(user.uid, bytes);
       dlog("_pickAndUploadAvatar: updateAvatar DONE");
-      if (!context.mounted) return;
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('アイコン画像を更新しました')),
-      );
+
+      // Invalidate to refresh user data
+      ref.invalidate(authControllerProvider);
+
+      // Always dismiss loading dialog
+      dlog("_pickAndUploadAvatar: dismissing loading dialog");
+      navigator.pop();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('アイコン画像を更新しました')),
+        );
+      }
     } catch (e, st) {
       dlog("_pickAndUploadAvatar: ERROR: $e");
       dlog("_pickAndUploadAvatar: STACK: $st");
-      if (!context.mounted) return;
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('エラー: $e')),
-      );
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('エラー: $e')),
+        );
+      }
     }
   }
 
@@ -432,4 +443,3 @@ class _AccountSection extends ConsumerWidget {
     );
   }
 }
-
