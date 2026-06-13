@@ -1,33 +1,6 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:collection';
-
-class DebugLog {
-  static final Queue<String> _logs = Queue<String>();
-  static final List<VoidCallback> _listeners = [];
-  static const int maxLogs = 200;
-
-  static void add(String message) {
-    final timestamp = DateTime.now().toIso8601String().substring(11, 23);
-    _logs.addLast('[$timestamp] $message');
-    if (_logs.length > maxLogs) _logs.removeFirst();
-    for (final listener in _listeners) {
-      listener();
-    }
-  }
-
-  static void addListener(VoidCallback listener) => _listeners.add(listener);
-  static void removeListener(VoidCallback listener) => _listeners.remove(listener);
-  static List<String> get logs => _logs.toList();
-  static void clear() {
-    _logs.clear();
-    for (final listener in _listeners) {
-      listener();
-    }
-  }
-}
+import 'debug_log.dart';
 
 class DebugOverlay extends StatefulWidget {
   final Widget child;
@@ -105,16 +78,23 @@ class _DebugOverlayState extends State<DebugOverlay> {
         Positioned(
           bottom: 80,
           right: 8,
-          child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-            onTap: () => setState(() => _visible = !_visible),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: _visible ? Colors.yellow : Colors.black54,
-                borderRadius: BorderRadius.circular(8),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                DebugLog.add("DEBUG button tapped!");
+                setState(() => _visible = !_visible);
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: _visible ? Colors.yellow : Colors.black54,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.white24),
+                ),
+                child: Text(_visible ? 'DEBUG X' : 'DEBUG', style: TextStyle(color: _visible ? Colors.black : Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
               ),
-              child: Text(_visible ? 'DEBUG ✕' : 'DEBUG', style: TextStyle(color: _visible ? Colors.black : Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
             ),
           ),
         ),
@@ -122,5 +102,3 @@ class _DebugOverlayState extends State<DebugOverlay> {
     );
   }
 }
-
-
