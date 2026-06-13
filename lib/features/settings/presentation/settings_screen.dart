@@ -16,6 +16,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
+    dlog("SettingsScreen.build: user=${user?.displayName}, photoUrl=${user?.photoUrl}");
     final theme = Theme.of(context);
 
     return Scaffold(

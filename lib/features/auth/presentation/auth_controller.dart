@@ -12,11 +12,13 @@ part 'auth_controller.g.dart';
 @riverpod
 class AuthController extends _$AuthController {
   StreamSubscription<dynamic>? _userSub;
+  StreamController<UserModel?>? _controller;
 
   @override
   Stream<UserModel?> build() {
     dlog("AuthController.build: starting stream");
-    final controller = StreamController<UserModel?>();
+    final controller = StreamController<UserModel?>.broadcast();
+    _controller = controller;
 
     // Listen to auth state changes
     FirebaseAuth.instance.authStateChanges().listen((fbUser) async {
@@ -32,7 +34,8 @@ class AuthController extends _$AuthController {
           .doc(fbUser.uid)
           .snapshots()
           .listen((snap) {
-        dlog("AuthController.build: snapshot received, exists=${snap.exists}");
+        final photoUrl = snap.data()?['photoUrl'];
+        dlog("AuthController.build: snapshot received, exists=${snap.exists}, photoUrl=$photoUrl");
         if (snap.exists && snap.data() != null) {
           final user = UserModel.fromJson(snap.data()!);
           controller.add(user);
@@ -96,7 +99,16 @@ class AuthController extends _$AuthController {
       dlog("AuthController.updateAvatar: photoUrl=$photoUrl");
       dlog("AuthController.updateAvatar: calling updatePhotoUrl...");
       await repo.updatePhotoUrl(uid, photoUrl);
-      dlog("AuthController.updateAvatar: DONE - Firestore updated, stream will auto-refresh");
+      dlog("AuthController.updateAvatar: DONE - Firestore updated");
+
+      // Manually push updated user to stream after Firestore write completes
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (doc.exists && doc.data() != null) {
+        final updatedUser = UserModel.fromJson(doc.data()!);
+        dlog("AuthController.updateAvatar: manually pushing to stream, photoUrl=${updatedUser.photoUrl}");
+        _controller?.add(updatedUser);
+        dlog("AuthController.updateAvatar: manually pushed to stream DONE");
+      }
     } catch (e, st) {
       dlog("AuthController.updateAvatar: ERROR: $e");
       dlog("AuthController.updateAvatar: STACK: $st");
@@ -108,9 +120,11 @@ class AuthController extends _$AuthController {
 @riverpod
 UserModel? currentUser(CurrentUserRef ref) {
   final asyncUser = ref.watch(authControllerProvider);
-  return asyncUser.when(
+  final user = asyncUser.when(
     data: (user) => user,
     loading: () => null,
     error: (_, _) => null,
   );
+  dlog("currentUserProvider: photoUrl=${user?.photoUrl}");
+  return user;
 }
