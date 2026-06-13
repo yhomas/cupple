@@ -72,10 +72,19 @@ class AuthController extends _$AuthController {
 
   Future<void> updateAvatar(String uid, Uint8List imageBytes) async {
     dlog("AuthController.updateAvatar: START");
-    final repo = ref.read(authRepositoryProvider);
-    final photoUrl = await repo.uploadAvatar(uid, imageBytes);
-    await repo.updatePhotoUrl(uid, photoUrl);
-    dlog("AuthController.updateAvatar: DONE");
+    try {
+      final repo = ref.read(authRepositoryProvider);
+      dlog("AuthController.updateAvatar: calling uploadAvatar...");
+      final photoUrl = await repo.uploadAvatar(uid, imageBytes);
+      dlog("AuthController.updateAvatar: photoUrl=$photoUrl");
+      dlog("AuthController.updateAvatar: calling updatePhotoUrl...");
+      await repo.updatePhotoUrl(uid, photoUrl);
+      dlog("AuthController.updateAvatar: DONE");
+    } catch (e, st) {
+      dlog("AuthController.updateAvatar: ERROR: $e");
+      dlog("AuthController.updateAvatar: STACK: $st");
+      rethrow;
+    }
   }
 }
 

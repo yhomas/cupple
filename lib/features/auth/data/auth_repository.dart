@@ -104,13 +104,23 @@ class AuthRepository {
   }
 
   Future<String> uploadAvatar(String uid, Uint8List imageBytes) async {
-    dlog("uploadAvatar: uid=$uid");
-    final ref = _storage.ref().child('avatars/$uid.jpg');
-    final metadata = SettableMetadata(contentType: 'image/jpeg');
-    await ref.putData(imageBytes, metadata);
-    final url = await ref.getDownloadURL();
-    dlog("uploadAvatar: url=$url");
-    return url;
+    dlog("uploadAvatar: uid=$uid, bytes=${imageBytes.length}");
+    try {
+      final ref = _storage.ref().child('avatars/$uid.jpg');
+      dlog("uploadAvatar: ref=${ref.fullPath}");
+      final metadata = SettableMetadata(contentType: 'image/jpeg');
+      dlog("uploadAvatar: putting data...");
+      final uploadTask = ref.putData(imageBytes, metadata);
+      final snapshot = await uploadTask;
+      dlog("uploadAvatar: upload complete, state=${snapshot.state}");
+      final url = await ref.getDownloadURL();
+      dlog("uploadAvatar: url=$url");
+      return url;
+    } catch (e, st) {
+      dlog("uploadAvatar: ERROR: $e");
+      dlog("uploadAvatar: STACK: $st");
+      rethrow;
+    }
   }
 
   Future<void> updatePhotoUrl(String uid, String photoUrl) async {
