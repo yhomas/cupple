@@ -29,7 +29,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/max_width_container.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/theme_controller.dart';
+
 import '../../cards/domain/card_model.dart';
 import '../../cards/presentation/card_controller.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -58,13 +58,6 @@ class ReportScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('レポート'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.brightness_6),
-            tooltip: 'テーマ切替',
-            onPressed: () => ref.read(themeModeControllerProvider.notifier).toggle(),
-          ),
-        ],
       ),
       body: MaxWidthContainer(
         child: cardsAsync.when(
