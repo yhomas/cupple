@@ -3,9 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'firebase_options.dart';
 import 'app.dart';
 import 'core/debug/debug_log.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  dlog('Background notification received: ${message.messageId}');
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +38,20 @@ void main() async {
     dlog('main: Exception: $e');
     firebaseError = 'Firebase init error: $e';
   }
+
+  // FCM setup
+  try {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      dlog('Foreground notification received: ${message.notification?.title}');
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      dlog('Notification tapped: ${message.data}');
+    });
+  } catch (e) {
+    dlog('main: FCM setup error: $e');
+  }
+
   runApp(
     ProviderScope(
       child: CuppleApp(firebaseError: firebaseError),

@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/debug/debug_log.dart';
 import '../data/auth_repository.dart';
 import '../domain/user_model.dart';
+import '../../notification/data/fcm_repository.dart';
 
 part 'auth_controller.g.dart';
 
@@ -60,6 +61,12 @@ class AuthController extends _$AuthController {
     final repo = ref.read(authRepositoryProvider);
     await repo.signInWithEmail(email, password);
     dlog("AuthController.signIn: DONE");
+    // Save FCM token after sign in
+    final fcmRepo = ref.read(fcmRepositoryProvider);
+    final fbUser = FirebaseAuth.instance.currentUser;
+    if (fbUser != null) {
+      await fcmRepo.saveToken(fbUser.uid);
+    }
   }
 
   Future<void> signUp(String email, String password, String displayName) async {
@@ -67,6 +74,12 @@ class AuthController extends _$AuthController {
     final repo = ref.read(authRepositoryProvider);
     await repo.signUpWithEmail(email, password, displayName);
     dlog("AuthController.signUp: DONE");
+    // Save FCM token after sign up
+    final fcmRepo = ref.read(fcmRepositoryProvider);
+    final fbUser = FirebaseAuth.instance.currentUser;
+    if (fbUser != null) {
+      await fcmRepo.saveToken(fbUser.uid);
+    }
   }
 
   Future<void> signOut() async {

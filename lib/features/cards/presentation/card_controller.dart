@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/debug/debug_log.dart';
 import '../data/cards_repository.dart';
 import '../domain/card_model.dart';
+import '../../notification/data/notification_service.dart';
 
 part 'card_controller.g.dart';
 
@@ -39,6 +40,15 @@ class CardController extends _$CardController {
       dlog("CardController.createCard: cardId=${card.cardId}");
       await repo.createCard(card);
       dlog("CardController.createCard: DONE");
+
+      // Send notification to partner
+      final notificationService = ref.read(notificationServiceProvider);
+      await notificationService.sendCardNotification(
+        coupleId: coupleId,
+        senderId: senderId,
+        senderName: senderName ?? 'パートナー',
+        card: card,
+      );
     } catch (e, st) {
       dlog("CardController.createCard: ERROR: $e");
       dlog("CardController.createCard: STACK: $st");

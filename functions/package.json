@@ -1,0 +1,14 @@
+
+{
+  "name": "cupple-functions",
+  "version": "1.0.0",
+  "description": "Cloud Functions for Cupple notifications",
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^5.0.1"
+  }
+}

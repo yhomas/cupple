@@ -7,6 +7,7 @@ class UserModel {
   final String? photoUrl;
   final String? partnerUid;
   final String? coupleId;
+  final String? fcmToken;
   final DateTime createdAt;
 
   const UserModel({
@@ -15,6 +16,7 @@ class UserModel {
     this.photoUrl,
     this.partnerUid,
     this.coupleId,
+    this.fcmToken,
     required this.createdAt,
   });
 
@@ -27,6 +29,7 @@ class UserModel {
       photoUrl: json['photoUrl'] as String?,
       partnerUid: json['partnerUid'] as String?,
       coupleId: json['coupleId'] as String?,
+      fcmToken: json['fcmToken'] as String?,
       createdAt: json['createdAt'] is Timestamp
           ? (json['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
@@ -40,6 +43,7 @@ class UserModel {
       'photoUrl': photoUrl,
       'partnerUid': partnerUid,
       'coupleId': coupleId,
+      if (fcmToken != null) 'fcmToken': fcmToken,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -50,6 +54,7 @@ class UserModel {
     String? photoUrl,
     String? partnerUid,
     String? coupleId,
+    String? fcmToken,
     DateTime? createdAt,
   }) {
     return UserModel(
@@ -58,6 +63,7 @@ class UserModel {
       photoUrl: photoUrl ?? this.photoUrl,
       partnerUid: partnerUid ?? this.partnerUid,
       coupleId: coupleId ?? this.coupleId,
+      fcmToken: fcmToken ?? this.fcmToken,
       createdAt: createdAt ?? this.createdAt,
     );
   }
